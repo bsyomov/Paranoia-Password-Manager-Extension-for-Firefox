@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
+
+  	
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="EDIT ADDITIONAL FIELD">
+<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_edit_urlcard_additionalfield.js"></script>
+	
+<vbox align="left">
+	<label id="title" class="title" value="Modify your UrlCard's Additional field"/>
+	<description flex="1"></description>	
+	
+	<hbox>
+		<label class="inputname" value="Field id" />
+		<textbox class="inputfield" size="50" maxlength="64" id="f_id" label="" />
+	</hbox>
+	<hbox>
+		<label class="inputname" value="Field value" />
+		<textbox class="inputfield" size="50" id="f_value" label="" />
+	</hbox>
+	
+</vbox>
+<separator />
+<hbox align="right">
+		<button label="set" icon="apply" oncommand="ParanoiaPasswordManager.XUL2.w_save();"/>
+		<button label="cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL2.w_close();"/>
+	</hbox>
+</window>

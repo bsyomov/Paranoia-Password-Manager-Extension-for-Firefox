@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
+
+  	
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="EDIT URLCARD">
+<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_edit_urlcard.js"></script>
+	
+<vbox align="left">
+	<label id="title" class="title" value=""/>
+	<description flex="1">Modify your UrlCard</description>	
+	
+	<separator />
+	
+	<hbox>
+		<label class="inputname" value="name" />
+		<textbox class="inputfield" size="35" maxlength="64" id="name" label="" />
+	</hbox>
+	<hbox>
+		<label class="inputname" value="url" />
+		<textbox class="inputfield" size="60" id="url" label="" />
+	</hbox>
+	
+	<separator />
+	
+	<label class="title" value="Additional fields"/>
+	<vbox width="680" style="border: 1px solid #ababab;" id="AFBOX">
+		<hbox>
+			<label class="" value="FIELD ID" style="width:300px; background-color:#000000; color:#ffffff; padding:2px; margin:0;"/>
+			<label class="" value="FIELD VALUE"  style="width:360px; background-color:#000000; color:#ffffff; padding:2px; margin:0;"/>
+			<label class="" value=""  onclick="ParanoiaPasswordManager.XUL.AF_click_new();" style="width:20px; color:#ffffff; padding:2px; margin:0; background: #000000 url(chrome://paranoia/skin/images/add.png) center center no-repeat;"/>
+		</hbox>
+	</vbox>
+	
+</vbox>
+<separator />
+<hbox align="right">
+		<button label="save" icon="save" oncommand="ParanoiaPasswordManager.XUL.w_save();"/>
+		<button label="cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>
+	</hbox>
+</window>

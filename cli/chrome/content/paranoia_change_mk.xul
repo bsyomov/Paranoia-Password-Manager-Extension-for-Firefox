@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
+
+  	
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="PARANOIA MASTER KEY CHANGE">
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_change_mk.js" />
+	
+	<vbox align="center">
+		<hbox height="90" width="700">
+			<label class="logo-64" value="" width="70" />
+			<vbox>
+				<label id="title" class="title" value="Paranoia Password Management" />
+				<label id="description" value="Change your encryption scheme and your Master Key." />
+			</vbox>
+		</hbox>
+	
+		<hbox width="700">
+			<vbox>
+				<label value="Encryption Scheme" />
+				<listbox id="ESS" width="150" rows="5" onselect="ParanoiaPasswordManager.XUL.w_es_select();" />
+			</vbox>
+			<textbox id="encdesc" value="" class="desc" width="200" rows="5" multiline="true" readonly="true"/>
+			<vbox>
+				<label value="Master Key" />
+				<textbox class="inputfield" width="300" rows="5" id="masterkey" value="" multiline="true"/>
+			</vbox>
+		</hbox>
+
+		<label id="sysmsg" value="" class="error" />
+		<button label="Change and re-encrypt my settings" icon="accept" oncommand="ParanoiaPasswordManager.XUL.w_change();"/>
+		<button label="Cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>
+	</vbox>
+</window>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="rdf:#$IYoHK3"
+                   em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+			 em:type="2"
+                   em:minVersion="5.0"
+                   em:maxVersion="6.*" />
+  <RDF:Description RDF:about="urn:mozilla:install-manifest"
+                   em:id="paranoia@alfazeta.com"
+                   em:name="Paranoia Password Manager"
+			 em:iconURL="chrome://paranoia/skin/images/logo/paranoia_32.png"
+                   em:version="0.0.2rc3"
+                   em:creator="Adam Jakab"
+                   em:description="PPM is a private password management system add-on."
+                   em:homepageURL="http://paranoia.alfazeta.com/" 
+			 em:unpack="true">
+    <em:targetApplication RDF:resource="rdf:#$IYoHK3"/>
+  </RDF:Description>
+</RDF:RDF>

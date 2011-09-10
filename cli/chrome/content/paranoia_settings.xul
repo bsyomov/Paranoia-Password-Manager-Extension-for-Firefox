@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/global.css" ?>
+<?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
+  
+  
+<window id="paranoia-settings" 
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	>
+	
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings.js"></script>
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_passurl.js"></script>
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_config.js"></script>
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_server.js"></script>
+	
+	<hbox height="90">
+		<label class="logo-64" value="" width="90" />
+		<vbox>
+			<label class="title" value="Paranoia Password Management" />
+			<label value="If you are paranoid about keeping your passwords in the cloud this is an add-on for you!" />
+		</vbox>
+	</hbox>
+	
+	
+		<tabbox id="settings-tabbox">
+				<tabs>
+					<tab label="PASSWORD/URL MANAGEMENT" />
+					<tab label="CONFIGURATION" />
+					<tab label="PARANOIA SERVERS" />
+				</tabs>
+				
+				<tabpanels id="settingsTabPanels" height="600">					
+					
+					<tabpanel>							
+						<vbox minheight="600" width="1250">
+							
+							<hbox>
+								<hbox align="left" flex="1">
+									<label control="passUrlFilter" value="search:" style="padding-top:5px;"/>
+									<textbox id="passUrlFilter" oninput="ParanoiaPasswordManager.pSettings.PASSURL.setFilter(event)" style="width:200px;" align="left"/>
+								</hbox>
+								<hbox align="right" flex="1">
+									<button oncommand="ParanoiaPasswordManager.pSettings.PASSURL.exportPasscardsToFile();" label="EXPORT" icon=""/>
+									<button oncommand="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick_new('passcard',0);" label="NEW PASSCARD" icon="add"/>
+								</hbox>
+							</hbox>
+							
+							<tree id="dataTree" flex="1" seltype="single" class="tree" treelines="true" hidecolumnpicker="true" onclick="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick(this,event)">								
+								<treecols>
+									<treecol id="name" label="name" flex="5" primary="true"/>
+									<splitter class="tree-splitter"/>
+									<treecol id="url" label="url" flex="10" />
+									<treecol id="new" width="20" fixed="true"/>
+									<treecol id="edit" width="20" fixed="true"/>
+									<treecol id="delete" width="20" fixed="true"/>
+									<treecol id="sync" width="20" fixed="true"/>
+								</treecols>
+								<treechildren/>
+							</tree>
+						</vbox>
+					</tabpanel>
+					
+					
+					<tabpanel>
+						<vbox minheight="600" width="1250">		
+									
+							<hbox>
+								<hbox align="left" flex="1">
+									<label control="configFilter" value="search:" style="padding-top:5px;"/>
+									<textbox id="configFilter" oninput="ParanoiaPasswordManager.pSettings.CONFIG.setFilter(event)" style="width:200px;" align="left"/>
+								</hbox>
+								<hbox align="right" flex="1">
+									<button oncommand="ParanoiaPasswordManager.pSettings.CONFIG.exportConfigurationToFile();" label="EXPORT" icon=""/>
+									<button oncommand="ParanoiaPasswordManager.pSettings.CONFIG.changeMasterKey();" label="CHANGE LOGIN MASTER KEY" icon=""/>
+									<button oncommand="ParanoiaPasswordManager.pSettings.CONFIG.confTreeClick_new();" label="ADD CONFIG" icon="add"/>
+								</hbox>
+							</hbox>
+							
+							<tree id="confTree" flex="1" seltype="single" class="tree" treelines="true" hidecolumnpicker="true" onclick="ParanoiaPasswordManager.pSettings.CONFIG.confTreeClick(this,event)">
+								<treecols>
+									<treecol id="config_name" label="name" flex="5" primary="true"/>
+									<splitter class="tree-splitter"/>
+									<treecol id="config_value" label="value" flex="10" />
+									<treecol id="config_edit" width="20" fixed="true"/>
+									<treecol id="config_delete" width="20" fixed="true"/>
+								</treecols>
+								<treechildren/>								
+							</tree>							
+						</vbox>								
+					</tabpanel>
+					
+					
+					<tabpanel height="600">
+						<vbox>
+							<vbox width="1250">
+								<hbox align="right">
+									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_changeMultipleServerESMK();" label="CHANGE MULTIPLE SERVER ES/MK" icon=""/>
+									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_resync_all_servers();" label="RESYNC SERVERS" icon="refresh"/>
+									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_addParanoiaServer();" label="ADD SERVER" icon="add"/>								
+								</hbox>
+							</vbox>							
+							<vbox height="600" id="PARANOIA_SRV_ENTRIES" style="overflow:auto;" />
+						</vbox>
+					</tabpanel>
+					
+				</tabpanels>
+		</tabbox>
+</window>

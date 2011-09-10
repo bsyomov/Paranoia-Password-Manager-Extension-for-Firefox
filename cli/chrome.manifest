@@ -1,0 +1,14 @@
+content   		paranoia              				chrome/content/
+resource		paranoiaModules				modules/
+skin      		paranoia modern				chrome/skin/modern/
+
+overlay chrome://browser/content/browser.xul  				chrome://paranoia/content/paranoia_overlay.xul
+style	chrome://browser/content/browser.xul				chrome://paranoia/skin/paranoia.css
+style	chrome://global/content/customizeToolbar.xul		chrome://paranoia/skin/paranoia.css
+
+component {444a1959-b040-467c-8978-5a7ea503f0a6} components/paranoia_component.js
+contract @alfazeta.com/ParanoiaPasswordManagerComponent;1 {444a1959-b040-467c-8978-5a7ea503f0a6}
+category profile-after-change ParanoiaPasswordManagerComponent @alfazeta.com/ParanoiaPasswordManagerComponent;1
+
+locale    		paranoia  en-US      			locale/en-US/
+locale    		paranoia  it-IT      				locale/it-IT/

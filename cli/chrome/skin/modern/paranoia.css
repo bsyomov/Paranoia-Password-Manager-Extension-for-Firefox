@@ -1,0 +1,66 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+#ParanoiaToolbarButton {list-style-image: url(chrome://paranoia/skin/images/logo/paranoia_32_off.png);}
+
+
+/*MAIN MENU ITEMO ICONS*/
+#pmm_logout {
+	list-style-image: url(chrome://paranoia/skin/images/logout.png);
+	padding-left:5px;
+}
+#pmm_config {
+	list-style-image: url(chrome://paranoia/skin/images/wrench.png);
+	padding-left:5px;
+}
+.pmm_passurlcard {
+	list-style-image: url(chrome://paranoia/skin/images/www.png);
+	padding-left:5px;
+}
+
+
+
+
+
+
+.title {font-size:150%; color:#333333;padding-top:15px;}
+.error {color:#ff0000; font-size:75%;}
+.desc {color:#333333; font-size:75%;}
+label.inputname {color: #333333; width:150px;}
+textbox.inputfield{color:#111111;margin:0}
+
+label.lock_closed {
+	background-image: url(chrome://paranoia/skin/images/lock_closed.png); 
+	background-position: center left; 
+	background-repeat: no-repeat;
+}
+label.lock_opened {
+	background-image: url(chrome://paranoia/skin/images/lock_open.png); 
+	background-position: center; 
+	background-repeat: no-repeat;
+}
+
+
+/*CONFIG TREE STYLING*/
+treechildren::-moz-tree-cell-text { font-size:8pt;margin-left:5px;}
+
+treechildren::-moz-tree-row { background-color: #EEEEEE; }
+treechildren::-moz-tree-row(odd) { background-color: #DDDDDD; }
+
+treechildren::-moz-tree-row(selected) { background-color: #ABDA41; }
+treechildren::-moz-tree-row(odd, selected) { background-color: #ABDA41; }
+
+treechildren::-moz-tree-cell-text(selected) { color: #000000; }
+treechildren::-moz-tree-cell-text(odd, selected) { color: #000000; }
+
+
+
+
+
+
+
+/*LOGO CLASSES*/
+.logo-256{background-image: url(chrome://paranoia/skin/images/logo/paranoia_256.png); background-position: center; background-repeat: no-repeat;}
+.logo-128{background-image: url(chrome://paranoia/skin/images/logo/paranoia_128.png); background-position: center; background-repeat: no-repeat;}
+.logo-64{background-image: url(chrome://paranoia/skin/images/logo/paranoia_64.png); background-position: center; background-repeat: no-repeat;}
+.logo-32{background-image: url(chrome://paranoia/skin/images/logo/paranoia_32.png); background-position: center; background-repeat: no-repeat;}
+.logo-16{background-image: url(chrome://paranoia/skin/images/logo/paranoia_16.png); background-position: center; background-repeat: no-repeat;}
