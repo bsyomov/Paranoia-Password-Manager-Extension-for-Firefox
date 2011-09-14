@@ -12,8 +12,24 @@
 	list-style-image: url(chrome://paranoia/skin/images/wrench.png);
 	padding-left:5px;
 }
+#pmm_info {
+	list-style-image: url(chrome://paranoia/skin/images/info.png);
+	padding-left:5px;
+}
+#pmm_pwgen {
+	list-style-image: url(chrome://paranoia/skin/images/pwgen.png);
+	padding-left:5px;
+}
+#ParanoiaUtilitiesMenu {
+	list-style-image: url(chrome://paranoia/skin/images/utils.png);
+	padding-left:5px;
+}
 .pmm_passurlcard {
 	list-style-image: url(chrome://paranoia/skin/images/www.png);
+	padding-left:5px;
+}
+.pmm_passurlcard_add {
+	list-style-image: url(chrome://paranoia/skin/images/addpasscard.png);
 	padding-left:5px;
 }
 
@@ -25,7 +41,7 @@
 .title {font-size:150%; color:#333333;padding-top:15px;}
 .error {color:#ff0000; font-size:75%;}
 .desc {color:#333333; font-size:75%;}
-label.inputname {color: #333333; width:150px;}
+label.inputname {color: #333333; width:130px;}
 textbox.inputfield{color:#111111;margin:0}
 
 label.lock_closed {
@@ -38,6 +54,12 @@ label.lock_opened {
 	background-position: center; 
 	background-repeat: no-repeat;
 }
+label.icon_pwgen {
+	background-image: url(chrome://paranoia/skin/images/pwgen.png); 
+	background-position: center; 
+	background-repeat: no-repeat;
+}
+
 
 
 /*CONFIG TREE STYLING*/

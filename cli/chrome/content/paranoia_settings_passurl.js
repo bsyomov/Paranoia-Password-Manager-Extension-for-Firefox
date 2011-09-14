@@ -67,7 +67,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				var d = JSON.parse(data);
 				var idx = PPM.pSettings.PASSURL.dataTree_getIDXbyID(d.id);
 				if (idx === false) {
-					log("STATECHANGE ERROR: IDX cannot be found for ID:" + d.id);
+					//log("STATECHANGE ERROR: IDX cannot be found for ID:" + d.id);
+					//this is ok - it happens when you have this xul open in a tab and you register a passcard in another tab from the main menu
+					//int this case all is ok but we need to refresh treeData
+					PPM.pSettings.PASSURL.refreshTreeData();
 					return;
 				}
 				if (d.operation == "insert" || d.operation == "update") {
@@ -276,12 +279,17 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				case "delete":
 					this.dataTreeClick_delete(idx);
 					break;
-				case "new":	
+				case "new":
 					//add new urlcard - only for passcards
 					if (this.dataTreeView.mydata[idx].get("collection") == "passcard") {
 						this.dataTreeClick_new("urlcard",idx);
 					}				
 					break;
+				case "url":
+					var myUrl = this.dataTreeView.mydata[idx].get("url");
+					var myAttr = this.dataTreeView.mydata[idx].get("name");
+					PPM.pUtils.openTab(myAttr,myUrl);					
+					break;	
 				default:
 					//log("NO ACTION DEFINED FOR Row/Col: "+idx+"/"+colname);
 					break;
@@ -312,6 +320,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					//this._log("creating new element of type: " + data.elementType);
 				} else {return;}
 			} catch (e) {log("dataTreeClick_edit ERROR("+JSON.stringify(d)+"): " + e);}
+			//
+			data.CALLBACKFUNCTION = 'pSettings.PASSURL.dataTreeClick_edit_save';//do NOT put PPM on front
 			
 			if (data.elementType == "passcard") {
 				var xul_2_load_url = 'chrome://paranoia/content/paranoia_edit_passcard.xul';
@@ -331,18 +341,20 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			* so we know here element's elementType / elementID / elementIndex
 			* .is_new is set true/false
 			* if .is_new === true ->elementID is changed to new elementID
-			*/			
+			*/
+			var self = PPM.pSettings.PASSURL;//we need this 'coz we are called by a .call(null,... - so we don't have "this"
+					
 			if (d.is_new === true) {
 				if (d.elementType == "passcard") {
 					//do something?					
 				} else if (d.elementType == "urlcard") {
 					var pc_idx = d.elementIndex;//on urlcads this is the idx of the parent passcard
-					if (this.dataTreeView.isContainerOpen(pc_idx) == false) {
-						this.dataTreeView.toggleOpenState(pc_idx);
+					if (self.dataTreeView.isContainerOpen(pc_idx) == false) {
+						self.dataTreeView.toggleOpenState(pc_idx);
 					}		
 				}
 			}
-			this.refreshTreeData();		
+			self.refreshTreeData();
 		}
 		
 		

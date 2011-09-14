@@ -3,7 +3,7 @@
 <?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
 
   	
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="PARANOIA LOGIN">
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="PARANOIA PASSWORD MANAGER LOGIN PANEL">
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_login.js" />	
 
 		<vbox align="center">
@@ -11,23 +11,31 @@
 			<hbox height="90" width="450">
 				<label class="logo-64" value="" width="70" />
 				<vbox>
-					<label class="title" value="Paranoia Password Management" />
+					<label class="title" value="Paranoia Password Manager Login" />
 					<label value="Select your encryption scheme and insert your Master Key." />
 				</vbox>
 			</hbox>
 			
-			<hbox width="450">
+			<vbox width="450">
 				<vbox>
-					<label value="Encryption Scheme" />
-					<listbox id="ESS" width="150" rows="5" onclick="ParanoiaPasswordManager.XUL.es_select();" />
+					<label value="Encryption Scheme"/>
+					<menulist id="ESS" name="ESS" oncommand="ParanoiaPasswordManager.XUL.es_select();">
+						<menupopup />
+					</menulist>
 				</vbox>
+				<separator />
 				<vbox>
-					<label value="Master Key" />
-					<textbox class="inputfield" width="300" rows="5" id="masterkey" value="Paranoia" multiline="true"/>
+					<label value="Master Key"/>
+					<hbox>
+						<textbox width="430" id="masterkey" value="" type="password" tabindex="1"/>
+						<label id="pass_toggler" class="lock_closed" onclick="ParanoiaPasswordManager.XUL.show_hide_password();" value="" width="16" height="16" />
+					</hbox>
 				</vbox>
-			</hbox>
+			</vbox>
+			<separator />
 			<label id="sysmsg" value="" class="error" />
-			<button label="Login" icon="accept" oncommand="ParanoiaPasswordManager.XUL.login();"/>
+			<separator />
+			<button label="Login" icon="accept" oncommand="ParanoiaPasswordManager.XUL.login();" tabindex="2" />
 			
 		</vbox>
 

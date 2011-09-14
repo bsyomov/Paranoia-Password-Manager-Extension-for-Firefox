@@ -14,6 +14,12 @@
 		<label class="inputname" value="name" />
 		<textbox class="inputfield" size="35" maxlength="64" id="name" label="" />
 	</hbox>
+	
+	<hbox>
+		<label class="inputname" value="url" />
+		<textbox class="inputfield" size="35" id="url" label="" />
+	</hbox>
+	<separator/>
 	<hbox>
 		<label class="inputname" value="username" />
 		<textbox class="inputfield" size="35" maxlength="48" id="username" label="" />
@@ -22,13 +28,17 @@
 		<label class="inputname" value="password" />
 		<textbox class="inputfield" size="35" maxlength="48" id="password" label="" type="password"/>
 		<label id="pass_toggler" class="lock_closed" onclick="ParanoiaPasswordManager.XUL.show_hide_password();" value="" width="16" height="16" />
+		<label id="pass_generator" class="icon_pwgen" onclick="ParanoiaPasswordManager.XUL.generate_password();" value="" width="16" height="16" />
 	</hbox>
-	<hbox>
-		<label class="inputname" value="url" />
-		<textbox class="inputfield" size="35" id="url" label="" />
-	</hbox>
+	<vbox style="padding-left:140px;">
+		<progressmeter id="pwmeter" value="0" style="width:300px; height:10px; margin-bottom:0px;" />
+		<label id="pwstatus" value="" style="width:300px; font-size:9px; line-height:10px; text-align:center; color:#aaaaaa; margin-top:0px;"/>
+	</vbox>
+	
+	
 	
 </vbox>
+<separator/>
 <hbox align="right">
 		<button label="save" icon="save" oncommand="ParanoiaPasswordManager.XUL.w_save();"/>
 		<button label="cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>

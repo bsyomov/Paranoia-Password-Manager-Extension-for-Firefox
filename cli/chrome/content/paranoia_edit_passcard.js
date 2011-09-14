@@ -9,7 +9,6 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 	var is_new = false;
 	var pass_shown = false;
 	
-	
 	this.XUL.init = function() {
 		if("arguments" in window && window.arguments.length > 0) {//DATA IS PASSED AS JSON DATA
 			try {
@@ -24,10 +23,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 						parent_id: 0,
 						collection: "passcard",
 						payload: JSON.stringify({
-							name: uuid,
-							username: "",
-							password: "",
-							url: ""
+							name: (_data.name!=undefined?_data.name:uuid),
+							username: (_data.username!=undefined?_data.username:""),
+							password: (_data.password!=undefined?_data.password:""),
+							url: (_data.url!=undefined?_data.url:""),
 						})
 					};
 					PC = PPM.pUtils.getPasscard(pcSettings);
@@ -43,6 +42,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				document.getElementById("password").value = PC.get("password");
 				document.getElementById("url").value = PC.get("url");
 				//
+				document.getElementById("password").oninput = PPM.XUL.passwordFieldChange;
+				PPM.XUL.passwordFieldChange();
 			} catch (e) {
 				PPM.XUL.log("ERROR - " + e);
 			}
@@ -79,7 +80,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		//
 		_data.is_new = is_new;
 		_data.elementID = PC.get("id");
-		PPM.pSettings.PASSURL.dataTreeClick_edit_save(_data);
+		//PPM.pSettings.PASSURL.dataTreeClick_edit_save(_data);
+		PPM.XUL.doCallback();
 		close();
 	}
 	
@@ -93,7 +95,45 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			document.getElementById("pass_toggler").setAttribute("class","lock_opened");		
 			document.getElementById("password").removeAttribute("type");
 		}
+	}	
+	
+	this.XUL.generate_password = function() {
+		var pw = PPM.pUtils.generatePassword();
+		//PPM.XUL.log("PW: " + pw);
+		document.getElementById("password").value = pw;
+		PPM.XUL.passwordFieldChange();
+		if (!pass_shown) {
+			PPM.XUL.show_hide_password();
+		}
 	}
+	
+	this.XUL.passwordFieldChange = function() {
+		var pwstrength = PPM.pUtils.getPasswordStrength(document.getElementById("username").value, document.getElementById("password").value);
+		//PPM.XUL.log("PWCH: " + pwstrength.score);
+		document.getElementById("pwmeter").value = pwstrength.score;
+		document.getElementById("pwstatus").value = pwstrength.status;
+	}
+	
+	this.XUL.doCallback = function() {
+		try {
+			var _CALLBACKFUNCTIONSTRING = _data.CALLBACKFUNCTION;
+			var fa = _CALLBACKFUNCTIONSTRING.split(".");
+			var f = PPM;
+			for (var i=0;i<fa.length;i++) {
+				var fn = fa[i];
+				f = f[fn];
+			}
+			if (typeof(f) == "function") {
+				f.call(null, _data);
+			} else {
+				throw("CALLBACK ERROR: PPM." + _CALLBACKFUNCTIONSTRING + " IS NOT A CALLABLE FUNCTION!");
+			}
+		} catch(e) {
+			PPM.log("CALLBACK ERROR: " + e);
+			//alert("FATAL ERROR! - the requested procedure could not be found!");
+		}
+	}
+	
 	
 	this.XUL.log = function(msg) {
 		PPM.log(msg, "PCEDIT");

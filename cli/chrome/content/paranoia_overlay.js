@@ -28,19 +28,100 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		
 		this.LISTENER_pageLoad_tabSelect = function() {
 			try {
-				if (PPM.get_state() > 2) {
-					//var browser = gBrowser.selectedBrowser;
-					//var doc = gBrowser.contentDocument;
-					//var href = doc.location.href;
-					var CW = PPM.pUtils.getCurrentWindow();
-					var TABCNT = CW.gBrowser.selectedBrowser.contentDocument;
-					var href = TABCNT.location.href;
-					checkForPassCardForUrl(href);
-				}
+				if (PPM.get_state() <= 2) {return;}
+				//var browser = gBrowser.selectedBrowser;
+				//var doc = gBrowser.contentDocument;
+				//var href = doc.location.href;
+				var CW = PPM.pUtils.getCurrentWindow();
+				var TABCNT = CW.gBrowser.selectedBrowser.contentDocument;
+				var href = TABCNT.location.href;
+				checkForPassCardForUrl(href);
 			} catch (e) {
 				log("PLTS-LISTENER ERROR: " + e);
 			}
-		}		
+		}
+		
+		this.LISTENER_formSubmit = function() {//------------------------------------------------function for intercepting and registering unknown login/password combinations
+			try {
+				if (PPM.get_state() <= 2) {return;}//not logged in or no data available
+				var DOC = PPM.pUtils.getCurrentWindowDocument();
+				var PMM = DOC.getElementById("ParanoiaUtilitiesSubmenu");
+				var SEP = DOC.getElementById("PMM_utils");
+				
+				//remove stale menuitem - PMM_PCREG
+				if (DOC.getElementById("PMM_PCREG") != null) {
+					PMM.removeChild(DOC.getElementById("PMM_PCREG"));
+				}
+				
+				var pwfield_index = null;
+				var unfield_index = null;
+				var CW = PPM.pUtils.getCurrentWindow();
+				var TABCNT = CW.gBrowser.selectedBrowser.contentDocument;
+				var inputNodes = getAllInputNodesInContent(TABCNT);
+				
+				//check for password field index
+				for (var ni = 0; ni < inputNodes.length; ni++) {
+					if (inputNodes[ni].getAttribute("type") == "password" && inputNodes[ni].value != null) {
+						pwfield_index = ni;
+						break;
+					}
+				}
+				
+				//check for username field index
+				for (var ni = pwfield_index - 1; ni >= 0; ni--) {//go backwards ad find first non hidden text field - should be username
+					if (inputNodes[ni].getAttribute("type") != "password" && inputNodes[ni].getAttribute("type") != "hidden" && inputNodes[ni].value != null) {
+						unfield_index = ni;
+						break;
+					}
+				}
+				if (unfield_index == null || pwfield_index == null) {
+					log("INTERCEPTED FORM POST BUT COULD NOT FIND USERNAME OR PASSWORD FIELDS! " + unfield_index+"/"+pwfield_index);
+					return;
+				}				
+				
+				//OK - we have username and password fields			
+				unfield = inputNodes[unfield_index];
+				pwfield = inputNodes[pwfield_index];
+				
+				if (unfield.value == "" || pwfield.value == "") {
+					log("INTERCEPTED FORM POST BUT USERNAME OR PASSWORD FIELDS ARE EMPTY! " + unfield.value+"/"+pwfield.value);
+					return;
+				}
+				
+				var already_registered = false;
+				var PCUCA = PPM.pServer.getUrlcardsForHREF(TABCNT.location.href);//matching passcards/urlcards for current url
+				//
+				for (var i = 0; i < PCUCA.length; i++) {
+					var PC = (PCUCA[i].get("collection") == "passcard"?PCUCA[i]:PPM.pServer.getPasscardWithID(PCUCA[i].get("parent_id")));
+					if (PC.get("username") == unfield.value && PC.get("password") == pwfield.value) {
+						already_registered = true;
+						break;
+					}
+				}
+				if (already_registered == true) {
+					log("THE INTERCEPTED LOGIN IS ALREADY REGISTERED IN PC: " + PC.get("name"));
+					return;
+				}
+				
+				log("INTERCEPTED LOGIN NOT REGISTERED: " + unfield.value + " / " + pwfield.value);
+				
+				//ADDING MENU ITEM SO THAT USER CAN CALL THE REGISTER FUNCTION
+				var s = {};
+				s.id = "PMM_PCREG";
+				s.label = "Register Passcard";
+				s.class = "pmm_passurlcard_add";
+				s.callback = "LISTENER_PCREG_CLICK";
+				s.url = TABCNT.location.href;
+				s.username = unfield.value;
+				s.password = pwfield.value;
+				//
+				var CMI = _createNewCustomMenuItem(s);		
+				PMM.insertBefore(CMI, SEP);//it's like insertAfter but there is no method like that ;)
+				
+			} catch (e) {
+				log("FORMSUBMIT ERROR: " + e);
+			}
+		}
 		
 		this.mainButtonClick = function() {
 			var current_state = PPM.get_state();
@@ -48,7 +129,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				var xul_2_load_url = 'chrome://paranoia/content/paranoia_login.xul';
 				var xul_2_load_width = 500;
 				var xul_2_load_height = 300;
-				var xul_2_load_params = 'chrome, modal, centerscreen';				
+				var xul_2_load_params = 'chrome, modal, centerscreen';	
 				var WIN = PPM.pUtils.getCurrentWindow();
 				WIN.openDialog(xul_2_load_url, "w_paranoia_login", "width="+xul_2_load_width+", height="+xul_2_load_height+"," + xul_2_load_params);				
 			} else if (current_state == 2 || current_state == 3) {//LOGGED IN - OPENING SUBMENU
@@ -93,9 +174,84 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			}
 		}
 		
+		this.mainMenuItemCall_pmm_info = function(el,ev) {
+			log("opening PPM web site...");
+			var myUrl = "http://paranoia.alfazeta.com";
+			var myAttr = "paranoia_website";
+			PPM.pUtils.openTab(myAttr,myUrl);
+		}
+		
+		this.mainMenuItemCall_pmm_pwgen = function(el,ev) {
+			log("opening Password Generator...");
+			var data = {};
+			data.CALLBACKFUNCTION = 'pOverlay.mainMenuItemCall_pmm_pwgen_DONE';//do NOT put PPM on front
+			var xul_2_load_url = 'chrome://paranoia/content/paranoia_generate_password.xul';
+			var xul_2_load_width = 500;
+			var xul_2_load_height = 200;
+			var xul_2_load_params = 'modal, centerscreen';
+			var JSONDATA = JSON.stringify(data);
+			window.openDialog(xul_2_load_url, "w_paranoia_edit_setting", "width="+xul_2_load_width+", height="+xul_2_load_height+"," + xul_2_load_params, JSONDATA);
+		}
+		
+		
+		this.mainMenuItemCall_pmm_pwgen_DONE = function(data) {
+			log("Inserting generated password in fields: " + data.password);
+			//
+			var CW = PPM.pUtils.getCurrentWindow();
+			var TABCNT = CW.gBrowser.selectedBrowser.contentDocument;
+			var inputNodes = getAllInputNodesInContent(TABCNT);
+			
+			//find password fields and insert pw
+			for (var ni = 0; ni < inputNodes.length; ni++) {
+				if (inputNodes[ni].getAttribute("type") == "password") {
+					inputNodes[ni].value = data.password;
+				}
+			}
+			
+		}
 		
 		
 				
+		this.LISTENER_PCREG_CLICK = function(ev, CMI){//CMI is custom_menu_item
+			try {
+				log("OPENING REGFORM TO REGISTER PASSCARD FOR URL: " + CMI.getAttribute("url"));
+				
+				var data = {};			
+				data.elementIndex = 0;
+				data.elementID = -1;
+				data.elementType = "passcard";
+				data.parentID = 0;	
+				//
+				data.name = "new passcard for window title...";
+				data.url = CMI.getAttribute("url");
+				data.username = CMI.getAttribute("username");
+				data.password = CMI.getAttribute("password");
+				//
+				data.CALLBACKFUNCTION = 'pOverlay.LISTENER_PCREG_CLICK_DONE';//do NOT put PPM on front
+				//
+				var xul_2_load_url = 'chrome://paranoia/content/paranoia_edit_passcard.xul';
+				var xul_2_load_width = 500;
+				var xul_2_load_height = 300;
+				var xul_2_load_params = 'modal, centerscreen';
+				window.openDialog(xul_2_load_url, "w_paranoia_edit_element", "width="+xul_2_load_width+", height="+xul_2_load_height+"," + xul_2_load_params, JSON.stringify(data));
+			} catch (e) {
+				log("PCREG ERROR: " + e);
+			}			
+		}
+		
+		this.LISTENER_PCREG_CLICK_DONE = function(data){//CMI is custom_menu_item
+			//log("passcard registered!");
+			var DOC = PPM.pUtils.getCurrentWindowDocument();
+			var PMM = DOC.getElementById("ParanoiaUtilitiesSubmenu");	
+			//remove stale menuitem - PMM_PCREG
+			if (DOC.getElementById("PMM_PCREG") != null) {
+				PMM.removeChild(DOC.getElementById("PMM_PCREG"));
+			}
+			//we call this only so that it refreshes menu items and changes back menuIcon
+			PPM.pOverlay.LISTENER_pageLoad_tabSelect();
+		}
+		
+		
 		
 		this.LISTENER_PWHINT_CLICK = function(ev, CMI) {//CMI is custom_menu_item
 			try {
@@ -105,33 +261,11 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				var additionalFieldsToCheck = new Array();
 				if (URLCARD != null) {
 					additionalFieldsToCheck = URLCARD.get("additional_fields");
-				}				
-								
-				//let's get input nodes on page and feed them into an array : inputNodes 
-				var inputNodes = new Array();			
-								
+				}					
+				//
 				var CW = PPM.pUtils.getCurrentWindow();
 				var TABCNT = CW.gBrowser.selectedBrowser.contentDocument;
-				
-				
-				var inputs = TABCNT.getElementsByTagName("input"); // returns list of xul elements of all <input .../> nodes
-				//- "inputs is a list not ARRAY - ...and i don't know how to remove elements from it - so very ugglyly ;) put elements into array				
-				for(var ni=0; ni<inputs.length; ni++) {
-					inputNodes.push(inputs[ni]);
-				}
-				delete(inputs);
-				
-				//let's get inputs in iframes
-				var iframes = TABCNT.getElementsByTagName("iframe");			
-				for(var ii=0; ii<iframes.length; ii++) {
-					var inputs = iframes[ii].contentWindow.document.getElementsByTagName("input");
-					for(var ni=0; ni<inputs.length; ni++) {
-						inputNodes.push(inputs[ni]);
-					}
-				}			
-				delete(iframes);
-				delete(inputs);
-				
+				var inputNodes = getAllInputNodesInContent(TABCNT);
 				
 				//LET'S AUTOCHECK FOR USERNAME AND PASSWORD FIELDS
 				var foundUNPW = autodetect_and_fill_in_username_and_password_fileds(inputNodes,PASSCARD.get("username"),PASSCARD.get("password"));
@@ -195,7 +329,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				if (node.getAttribute("type") == "password") {
 					var node_pw = node;
 					var node_un = inputNodes[ni-1];//the previous node
-					if (node_un.getAttribute("type") != "password") {
+					if (node_un.getAttribute("type") != "password" && node_un.getAttribute("type") != "hidden") {
 						found = true;
 						fill_in_this_filed(node_un, username);
 						fill_in_this_filed(node_pw, password);
@@ -209,7 +343,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		}
 		
 		var fill_in_this_filed = function(node,val) {
-			node.setAttribute("value", val);
+			//node.setAttribute("value", val);
+			node.value = val;
 			if (PPM.pConfig.getConfig("colorize_matched_fields") == 1) {
 				node.setAttribute("style",'background:#7cfc00; color:#7cfc00;');
 			}
@@ -218,17 +353,29 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		var checkForPassCardForUrl = function(href) {
 			//log("checking for passcards @href: " + href);
 			try {
-				_removeAllMenuItems();
-				var PCUCA = PPM.pServer.getUrlcardsForHREF(href);
-				if (PCUCA.length == 0) {
-					_setToolbarButtonIcon("paranoia_32.png",true);//resetting to default - true===only in current window
-					return;
-				}
-				_setToolbarButtonIcon("paranoia_32_teeth.png",true);//showing that we have passcards - true===only in current window
-				//log("FOUND URLCARDS # " + PCUCA.length + " for HREF: " + href);	
 				var DOC = PPM.pUtils.getCurrentWindowDocument();
 				var PMM = DOC.getElementById("ParanoiaMainMenu");
 				var SEP = DOC.getElementById("PMM_passhints");
+				
+				_removeAllMenuItems();
+				var PCUCA = PPM.pServer.getUrlcardsForHREF(href);
+
+				if (DOC.getElementById("PMM_PCREG") != null) {
+					_setToolbarButtonIcon("paranoia_32_blue.png", true);//resetting to default - true===only in current window
+				} else 	if (PCUCA.length == 0) {
+					_setToolbarButtonIcon("paranoia_32.png", true);//resetting to default - true===only in current window
+				} else {
+					_setToolbarButtonIcon("paranoia_32_teeth.png", true);//showing that we have passcards - true===only in current window
+				}
+				
+				if (PCUCA.length == 0) {
+					return;
+				}
+				
+				
+				
+				//log("FOUND URLCARDS # " + PCUCA.length + " for HREF: " + href);	
+				
 				
 				for (var i=0; i<PCUCA.length; i++) {
 					//var UC = UCA[i];//this can be passcard or urlcard
@@ -245,7 +392,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					s.passcard_id = PC.get("id");
 					s.urlcard_id = (UC!==null?UC.get("id"):"");
 					s.label = "[" + PC.get("name") + "]" + (UC!=null?" - " + UC.get("name"):"");
-					s.class = "pmm_passurlcard";					
+					s.class = "pmm_passurlcard";
+					s.callback = "LISTENER_PWHINT_CLICK";
 					//
 					var CMI = _createNewCustomMenuItem(s);
 					CMI.setPasscard(PC);
@@ -276,7 +424,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			}			
 			
 			//adding click listener
-			CMI.addEventListener("click", function(ev) {PPM.pOverlay.LISTENER_PWHINT_CLICK(ev,CMI)}, true);
+			//CMI.addEventListener("click", function(ev) {PPM.pOverlay.LISTENER_PWHINT_CLICK(ev,CMI)}, true);
+			if (typeof(CMI.getAttribute("callback")) != "undefined") {
+				CMI.addEventListener("click", function(ev) {PPM.pOverlay[CMI.getAttribute("callback")](ev,CMI);}, true);
+			}
 			
 			return (CMI);
 		}
@@ -296,7 +447,27 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		
 		
 		
-		
+		var getAllInputNodesInContent = function(C) {// returns array of all <input .../> nodes in C
+			//
+			var answer = new Array();
+			var inputs;
+			//
+			//in content
+			inputs = C.getElementsByTagName("input"); 
+			for(var ni=0; ni<inputs.length; ni++) {
+				answer.push(inputs[ni]);
+			}
+			
+			//in iframes in content
+			var iframes = C.getElementsByTagName("iframe");			
+			for(var ii=0; ii<iframes.length; ii++) {
+				inputs = iframes[ii].contentWindow.document.getElementsByTagName("input");
+				for(var ni=0; ni<inputs.length; ni++) {
+					answer.push(inputs[ni]);
+				}
+			}			
+			return(answer);
+		}
 		
 		
 		var _setToolbarButtonIcon = function(imageName, onlyCurrentWindow) {//var RW = WM.getMostRecentWindow("navigator:browser");
@@ -339,6 +510,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				if(tabContainer) {
 					tabContainer.addEventListener("TabSelect", PPM.pOverlay.LISTENER_pageLoad_tabSelect, false);
 				}
+				//FORM SUBMIT EVENT - this will NOT work in all cases(js...) - we need a better way to intercept post
+				if(theBrowser) {
+					theBrowser.addEventListener("submit", PPM.pOverlay.LISTENER_formSubmit, false);
+				}
 				//
 				var a = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 				a.addObserver(PPM.pOverlay, "paranoia-overlay-state-change", false);
@@ -353,11 +528,12 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				var theBrowser = document.getElementById("appcontent");
 				if (theBrowser) {
 					theBrowser.removeEventListener("DOMContentLoaded", PPM.pOverlay.LISTENER_pageLoad_tabSelect, true);
+					tabContainer.removeEventListener("submit", PPM.pOverlay.LISTENER_formSubmit, false);
 				}
 				//
 				var tabContainer = gBrowser.tabContainer;
 				if(tabContainer) {
-					tabContainer.removeEventListener("TabSelect", PPM.pOverlay.LISTENER_pageLoad_tabSelect, false);
+					tabContainer.removeEventListener("TabSelect", PPM.pOverlay.LISTENER_pageLoad_tabSelect, false);					
 				}
 				//
 				var a = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);

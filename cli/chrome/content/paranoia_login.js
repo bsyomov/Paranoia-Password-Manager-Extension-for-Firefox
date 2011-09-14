@@ -4,14 +4,18 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 (function() {
 	var PPM = ParanoiaPasswordManager;
 	this.XUL = {};
+	var pass_shown = false;
 	
 	this.XUL.init = function() {
 		//ParanoiaPasswordManager.log("initing");
 		var ESList = PPM.pUtils.getAvailableEncryptionSchemes();
 		var ESS = document.getElementById("ESS");
-		for (x=0; x<ESList.length; x++) {
-	        ESS.appendItem(ESList[x].name,ESList[x].name);
+		for (x = ESList.length-1; x >= 0; x--) {
+			ESS.appendItem(ESList[x].name,ESList[x].name);
+			//PPM.log(x + "-adding option: " + ESList[x].name, "LOGIN");
 		}
+		ESS.selectedIndex = 0;
+		document.getElementById("masterkey").focus();
 	}
 	
 	this.XUL.uninit = function() {
@@ -27,6 +31,19 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		if (ES == false) {
 			alert("This ES["+ESN+"] does NOT exist!");
 			return(false);
+		}
+		//PPM.log("selected option: " + ESN, "LOGIN");
+	}
+	
+	this.XUL.show_hide_password = function() {
+		if (pass_shown){
+			pass_shown = false;
+			document.getElementById("pass_toggler").setAttribute("class","lock_closed");
+			document.getElementById("masterkey").setAttribute("type","password");
+		} else {
+			pass_shown = true;
+			document.getElementById("pass_toggler").setAttribute("class","lock_opened");		
+			document.getElementById("masterkey").removeAttribute("type");
 		}
 	}
 	

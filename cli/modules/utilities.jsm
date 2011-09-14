@@ -92,6 +92,22 @@ function ParanoiaUtilities() {
 		return(_md5hash(txt));
 	}
 	
+	this.generatePassword = function(settings) {
+		if(typeof(settings) == "undefined") {settings = {};}
+		if (typeof(settings.pwlen) == "undefined" || isNaN(settings.pwlen)) {settings.pwlen = PPM.pConfig.getConfig("pwgen_length");}
+		if (settings.pwlen<6) {settings.pwlen=6;}
+		settings.specialchars = PPM.pConfig.getConfig("pwgen_specialchars");
+		return(passwordGenerator.getRandomPassword(settings));
+	}
+	
+	this.getPasswordStrength = function(username, password) {
+		if(typeof(settings) == "undefined") {settings = {};}		
+		settings.specialchars = PPM.pConfig.getConfig("pwgen_specialchars");		
+		return(PasswordStrength.test(settings,username,password));
+	}
+	
+	
+	
 	this.get_uuid = function() {
 		var chars = '0123456789abcdef'.split('');
 		var uuid = [], rnd = Math.random, r;
@@ -188,6 +204,8 @@ function ParanoiaUtilities() {
 		return(false);
 	}
 	
+	
+	
 	var registerEncryptionScheme = function(fileName) {
 		var TEST_TXT = "Adi bàcsi element a csatàba de nem vitt puskàt ùgyhogy szitàvà lottèk szegènyt.";//sorry about this
 		var TEST_KEY = "abcdefghijklmnopqrstuvwzxy";
@@ -256,10 +274,12 @@ function ParanoiaUtilities() {
 					}
 				}		
 			}
+			cryptoSchemes.sort();
 		} catch (e) {
 			log("Encryption scheme registration ERROR: " + e);
 		}	
 	}
+	
 	
 	var loadClasses = function() {
 		var subfolder = "classes";
@@ -272,6 +292,8 @@ function ParanoiaUtilities() {
 		load_JS_class("paranoia_server.js", typeof ParanoiaServer, subfolder, scope);
 		load_JS_class("passcard.js", typeof PASSCARD, subfolder, scope);
 		load_JS_class("urlcard.js", typeof URLCARD, subfolder, scope);
+		load_JS_class("pwgenerator.js", typeof passwordGenerator, subfolder, scope);
+		load_JS_class("pwstrength.js", typeof PasswordStrength, subfolder, scope);
 	}
 	
 	var load_JS_class = function(classFile, type, subfolder, scope) {
