@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/global.css" ?>
+<?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
+  
+  
+<window id="paranoia-settings" 
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	>
+	
+	<vbox style="border:1px solid #ff0000;" flex="1">
+		
+		<vbox height="90">
+			<label class="title" value="Paranoia Password Management" />
+			<label value="if you are paranoid about keeping your passwords in the cloud..." />
+		</vbox>
+		
+		
+		<tabbox id="settings-tabbox" flex="1">
+			<tabs>
+				<tab label="PASSWORD/URL MANAGEMENT" />
+				<tab label="CONFIGURATION" />
+				<tab label="PARANOIA SERVERS" />
+			</tabs>
+			<tabpanels id="settingsTabPanels" flex="1">
+				<tabpanel flex="1">
+					<label class="title" value="TAB1" />
+				</tabpanel>
+				<tabpanel flex="1">
+					<label class="title" value="TAB2" />
+				</tabpanel>
+				<tabpanel flex="1">
+					<label class="title" value="TAB3" />
+				</tabpanel>
+			</tabpanels>
+		</tabbox>	
+		
+	</vbox>
+	
+</window>

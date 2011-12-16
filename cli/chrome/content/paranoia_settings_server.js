@@ -10,7 +10,6 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		var PPM = ParanoiaPasswordManager;
 		var _logzone = "pSettings/SRV";
 		
-		
 		this.init = function() {
 			this.refresh_server_entries();
 			this.PSERV_update_screen_data();
@@ -66,10 +65,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			SRV_HBOX.setAttribute("style","border: 1px solid #ababab;");
 			
 			var SRV_MASTER = this.get_single_server(serverNumber, "master");
-			var SRV_MIRROR = this.get_single_server(serverNumber, "mirror");
+			//var SRV_MIRROR = this.get_single_server(serverNumber, "mirror");
 			
 			SRV_HBOX.insertBefore(SRV_MASTER, SRV_HBOX.lastChild);
-			SRV_HBOX.insertBefore(SRV_MIRROR, SRV_HBOX.lastChild.nextElement);
+			//SRV_HBOX.insertBefore(SRV_MIRROR, SRV_HBOX.lastChild.nextElement);
 			
 			return(SRV_HBOX);
 		}
@@ -91,7 +90,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			//THE SRV_VBOX ELEMENT
 			var SRV_VBOX = document.createElementNS(XUL_NS, "vbox");	
 			SRV_VBOX.setAttribute("id","srv_vbox_"+serverNumber+"_"+serverType);
-			SRV_VBOX.setAttribute("style","width:630px; height:150px; border: 1px solid #ababab;");
+			SRV_VBOX.setAttribute("flex",1);
+			SRV_VBOX.setAttribute("style","height:150px; border: 1px solid #ababab;");
 			
 				//THE TITLE BAR
 				var SRV_TITLE_BAR = document.createElementNS(XUL_NS, "hbox");
@@ -101,7 +101,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					//THE TITLE
 					var LAB = document.createElementNS(XUL_NS, "label");
 					LAB.setAttribute("id","srv_title_"+serverNumber+"_"+serverType);
-					LAB.setAttribute("style","width:550px; font-size: 14px; font-weight: bold; color: "+ srvColor +";");
+					LAB.setAttribute("flex",1);
+					LAB.setAttribute("style","font-size: 14px; font-weight: bold; color: "+ srvColor +";");
 					LAB.setAttribute("value",srvTitle);
 					SRV_TITLE_BAR.insertBefore(LAB, SRV_TITLE_BAR.lastChild);
 					
@@ -455,7 +456,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			//
 			var xul_2_load_url = 'chrome://paranoia/content/paranoia_change_mk.xul';
 			var xul_2_load_width = 700;
-			var xul_2_load_height = 300;
+			var xul_2_load_height = 350;
 			var xul_2_load_params = 'modal, centerscreen';
 			window.openDialog(xul_2_load_url, "w_paranoia_change_mk", "width="+xul_2_load_width+", height="+xul_2_load_height+"," + xul_2_load_params,  JSON.stringify(data));
 		}
@@ -500,12 +501,14 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		}
 		
 		this.PSERV_update_screen_data = function() {
+			if(PPM.get_state()<3) {return;}
 			var srvTypes = ["master","mirror"];
 			var numberOfRegisteredServers = PPM.pServer.getNumberOfRegisteredServers();		
 			for (var sn = 1; sn <= numberOfRegisteredServers; sn++) {
 				for (var st = 0; st < srvTypes.length; st++) {
 					var serverType = srvTypes[st];
 					var SRV_VBOX = document.getElementById("srv_vbox_"+sn+"_"+serverType);
+					if (!SRV_VBOX){continue;}//we don't put mirror anymore
 					var children = SRV_VBOX.children;
 					for (var ci = 0; ci < children.length; ci++) {
 						switch (children[ci].getAttribute("name")) {

@@ -9,11 +9,11 @@ const Cui = Cu["import"];
 function ParanoiaServerConcentrator() {
 	var PPM;
 	var _logzone = "pServer";
-	var paranoia_servers = new Array();
-	var combined_raw_data = new Array();
-	var combined_structured_data = new Object();
-	var operation_queue = new Array();
-	var queueID = 0;
+	var paranoia_servers;
+	var combined_raw_data;
+	var combined_structured_data;
+	var operation_queue;
+	var queueID;
 	
 	this.setup = function(ParanoiaPasswordManager) {
 		PPM = ParanoiaPasswordManager;
@@ -31,14 +31,12 @@ function ParanoiaServerConcentrator() {
 	}
 	
 	this.uninit = function() {
-		log("shutting down...");
-		//should check anc cancel "decryptionTimer" if running!!!
-		log("shutdown complete.");		
+		
 	}
     
 	
 	
-	this.registerServers = function() {//called by main.jsm on init
+	this.registerServers = function() {
 		paranoia_servers = new Array();
 		combined_raw_data = new Array();
 		combined_structured_data = new Object();
@@ -75,18 +73,10 @@ function ParanoiaServerConcentrator() {
 			}
 			srvIndex++;
 		}
-		//
-		var numRegSrv = _getNumberOfRegisteredServers();		
-		if (numRegSrv == 0) {
-			log("There are no servers configured.");
-			this.checkAndCombineServerData();
-		} else {
-			log("Registered "+_getNumberOfRegisteredServers()+" servers successfully.");
-			//servers will auto-connect and call by turn "server_has_loaded_payload"
-		}
+		log("Registered "+_getNumberOfRegisteredServers()+" servers successfully.");
+		
 	}
 	
-	/*
 	this.connectServers = function() {
 		return;//---------------------------------------------------------------TESTING SERVER AUTOCONNECTION
 		//CONNECT SERVERS
@@ -106,8 +96,7 @@ function ParanoiaServerConcentrator() {
 				}
 			}
 		}
-	}*/
-	
+	}	
 	
 	this.server_has_loaded_payload = function() {
 		var numberOfReadyServers = 0;
@@ -120,22 +109,14 @@ function ParanoiaServerConcentrator() {
 		}
 		if (numberOfReadyServers == srvNumber) {
 			this.checkAndCombineServerData();
+			PPM.loginSequenceCompleted();
 		}
 	}
 	
 	
 	this.disconnectAndUnregisterServers = function() {
-		var srvNumber = _getNumberOfRegisteredServers();
-		if (srvNumber==0) {
-			//no registered servers to diconnect
-			paranoia_servers = new Array();
-			combined_structured_data = new Object();
-			operation_queue = new Array();
-			queueID = 0;
-			PPM.logoutSequenceFinished();
-			return(false);
-		}
 		log("disconnecting Paranoia servers...");
+		var srvNumber = _getNumberOfRegisteredServers();
 		var srvTypes = ["master","mirror"];
 		for (var sn = 1; sn <= srvNumber; sn++) {
 			for (var st = 0; st < srvTypes.length; st++) {
@@ -148,20 +129,7 @@ function ParanoiaServerConcentrator() {
 		}
 	}
 	
-	this.serverConnected = function() {//called by servers after having connected
-		var numberOfConnectedServers = 0;
-		var srvNumber = _getNumberOfRegisteredServers();
-		for (var sn = 1; sn <= srvNumber; sn++) {
-			var serverType = "master";
-			if (this.getServerData(sn,serverType,"is_connected") == true) {
-				numberOfConnectedServers++;
-			}
-		}		
-		//notifying Overlay about server connection
-		Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "paranoia-overlay-state-change", null);
-	}
-	
-	this.serverDisconnected = function() {//called by servers after having disconnected
+	this.serverDisconnected = function() {
 		var numberOfDisconnectedServers = 0;
 		var srvNumber = _getNumberOfRegisteredServers();
 		for (var sn = 1; sn <= srvNumber; sn++) {
@@ -170,11 +138,7 @@ function ParanoiaServerConcentrator() {
 				numberOfDisconnectedServers++;
 			}
 		}
-		
-		//notifying Overlay about server disconnection
-		Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "paranoia-overlay-state-change", null);
-
-		//if already logged off AND ALL servers are disconnected
+		//if already logged off
 		if (PPM.get_state() == 2 && numberOfDisconnectedServers == srvNumber) {
 			while (this.unregisterServer(1,"master") === true) {
 				//this func will splice our server array so we can always remove #1 until there is one 
@@ -191,7 +155,7 @@ function ParanoiaServerConcentrator() {
 	
 	this.checkAndCombineServerData = function() {
 		/*--THIS FUNC SHOULD:
-		 * 1) GET PAYLOADS FROM SERVER(S) 
+		 * 1) GET SERVERS TO LOAD INITIAL(FULL) PAYLOAD DATA 
 		 * 2) COMBINE(concat) PAYLOADS FROM DIFFERENT SERVERS WITH SAME ID
 		 * 3) DECRYPT AND CHECK IF PAYLOADS ARE VALID (parsable)
 		 * 4) REGISTER PASSCARDS
@@ -242,101 +206,86 @@ function ParanoiaServerConcentrator() {
 				}
 			}			
 			//log("COMBINED RAW DATA MASTER: " + JSON.stringify(combined_raw_data["master"]));
-			//log("COMBINED RAW DATA MIRROR: " + JSON.stringify(combined_raw_data["mirror"]));			
+			//log("COMBINED RAW DATA MIRROR: " + JSON.stringify(combined_raw_data["mirror"]));
+			
+			
+			
+			
 			
 			
 			//-----------------------------------------FROM HERE ON I WILL USE MASTER DATA ONLY------------------------------			
+			
 			//--------------------NEEDS TO BE DONE: if there are some errors on master data check on mirror data ... this is why we have it
 			//--------------------THOUGHTS: in _DATA_ we still have the 'uncombined' parts from each server - it could happen that we must cross data
-			//------------------------------------from different server types master/mirror to recover data ... it needs a bit of tought...			
+			//------------------------------------from different server types master/mirror to recover data ... it needs a bit of tought...
 			
-			/*
+			
+			
 			if (combined_raw_data["master"].length == 0) {
 				log("CombinedRawData(master) is empty - No payload!");				
 				return;
-			}	
-			*/		
+			}
 			
-			//-------------------BECAUSE DECRYPTING ALL COMBINED PAYLOADS COULD TAKE A WHILE AND FREEZE THE BROWSER 
-			//------------------WE WILL DO THIS WITH TIMER SO WE CAN HAPPILY CLICK AWAY WHILST WORKING
 			
 			//3 - DECRYPTING AND CHECKING REGISTERED PAYLOADS
 			var px = 0;
 			var pmax = combined_raw_data["master"].length;
-			log("decrypting combined payloads..." + pmax);
-			//
-			decryptionTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-			decryptionTimer.init({
-				observe: function(subject, topic, data) {
-					try {
-						if (px>=pmax) {
-							decryptionTimer.cancel();
-							decryptionTimer = null;
-							PPM.pServer.checkAndCombineServerData_DONE();
-						} else {
-							//log(px + "/" + pmax + "...");
-							var decryptedPayloadString = PPM.pUtils.decryptWithScheme(combined_raw_data["master"][px].payload, MSMK, MSES);
-							JSON.parse(decryptedPayloadString);
-							// if the above did NOT throw an error then we have correctly decrypted and parsed "decryptedPayloadString" so we can set it as payload
-							combined_raw_data["master"][px].payload = decryptedPayloadString;
-							px++;
-						}
-					} catch (e) {
-						log("unparsable payload(" + px + ") ID: " + combined_raw_data["master"][px].id);
-						combined_raw_data["master"].splice(px, 1);
-						pmax--;
-					}
+			log("decrypting and checking registered payloads..." + pmax);
+			
+			while (px < pmax) {
+				try {
+					var decryptedPayloadString = PPM.pUtils.decryptWithScheme(combined_raw_data["master"][px].payload, MSMK, MSES);
+					JSON.parse(decryptedPayloadString);
+					/*
+					 * if the above did NOT throw an error then we have correctly decrypted and parsed "decryptedPayloadString"
+					 * so we can set it as payload
+					 * */
+					combined_raw_data["master"][px].payload = decryptedPayloadString;
+					px++;
+				} 
+				catch (e) {
+					log("unparsable payload(" + px + ") ID: " + combined_raw_data["master"][px].id);
+					combined_raw_data["master"].splice(px, 1);
+					pmax--;
 				}
-			}, 100, Ci.nsITimer.TYPE_REPEATING_SLACK);
-			//			
+			}
+			log("Number of valid payloads: " + pmax);
+			//log("DECRYPTED RAW DATA: " + JSON.stringify(combined_raw_data["master"]));///- ATTENTION THIS WILL EXPOSE/SHOW PASSWORDS IN CLEAR
+			
+			
+			//4 - ADDING PASSCARDS
+			log("registering PASSCARDS...");
+			var px = 0;
+			var pmax = combined_raw_data["master"].length;
+			while (px < pmax) {
+				p = combined_raw_data["master"][px];
+				if (p["collection"] == "passcard" && p["parent_id"] == 0) {
+					passcard = PPM.pUtils.getPasscard(p);
+					this.registerNewPasscard(passcard);
+				}
+				px++;
+			}
+			
+			//5 - ADDING URLCARDS
+			log("registering URLCARDS...");
+			var px = 0;
+			while (px < pmax) {
+				p = combined_raw_data["master"][px];
+				if (p["collection"] == "urlcard" && p["parent_id"] != 0) {
+					urlcard = PPM.pUtils.getUrlcard(p);
+					this.registerNewUrlcard(urlcard);
+				}
+				px++;
+			}
+			
+			/* getting rid of temporary values */
+			combined_raw_data["master"] = new Array();
+			delete (_DATA_);
+			
+			//_checkPasscards();//will log to console registered PCs
 		} catch(e) {
 			log("checkAndCombineServerData FAILED: " + e);
 		}
-	}
-	
-	
-	this.checkAndCombineServerData_DONE = function() {
-		log("Number of valid payloads: " + combined_raw_data["master"].length);
-		//log("DECRYPTED RAW DATA: " + JSON.stringify(combined_raw_data["master"]));///- ATTENTION THIS WILL EXPOSE/SHOW PASSWORDS IN CLEAR
-		
-		//4 - ADDING PASSCARDS
-		log("registering PASSCARDS...");
-		var px = 0;
-		var pmax = combined_raw_data["master"].length;
-		while (px < pmax) {
-			p = combined_raw_data["master"][px];
-			if (p["collection"] == "passcard" && p["parent_id"] == 0) {
-				passcard = PPM.pUtils.getPasscard(p);
-				this.registerNewPasscard(passcard);
-			}
-			px++;
-		}
-		
-		//5 - ADDING URLCARDS
-		log("registering URLCARDS...");
-		var px = 0;
-		while (px < pmax) {
-			p = combined_raw_data["master"][px];
-			if (p["collection"] == "urlcard" && p["parent_id"] != 0) {
-				urlcard = PPM.pUtils.getUrlcard(p);
-				this.registerNewUrlcard(urlcard);
-			}
-			px++;
-		}
-		
-		//getting rid of temporary values
-		combined_raw_data["master"] = new Array();
-		
-		//_checkPasscards();//will log to console registered PCs
-		
-		PPM.loginSequenceCompleted(); //set main PPM state to 3 (logged in + data loaded) and change PPM icon to green
-		try{
-			PPM.pOverlay.LISTENER_tabSelect();
-		} catch(e) {
-			log("cannot notify Overlay about loginSequenceCompletion: " + e);
-		}
-		
-		
 	}
 	
 	
@@ -633,16 +582,9 @@ function ParanoiaServerConcentrator() {
 	var _check_if_hrefs_match = function (Phref, Bhref) {//http://www.w3schools.com/jsref/jsref_obj_regexp.asp
 		//Phref=Paranoia URLCARD HREF(this can be a regular expression)
 		//Bhref=Browser href string
-		try {
-			if (Phref == "") {
-				return (false);
-			}//we don't want match on urlcards with NO url
-			var RE = new RegExp(Phref, '');
-			return (RE.test(Bhref));
-		} catch (e) {
-			log("_check_if_hrefs_match error: " + e + ": " + Phref);
-			return(false);
-		}
+		if (Phref=="") {return(false);}//we don't want match on urlcards with NO url
+		var RE = new RegExp(Phref,'');
+  		return (RE.test(Bhref));		
 	}
 	
 

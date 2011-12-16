@@ -7,6 +7,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 	var _ES;
 	var _MK;
 	var _CALLBACKFUNCTION;
+	var pass_shown = false;
 	
 	this.XUL.init = function() {
 		var _data_json = window.arguments[0];
@@ -108,6 +109,20 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		}
 		document.getElementById("encdesc").value = ESDESC;
 	}
+	
+	this.XUL.show_hide_password = function() {
+		if (pass_shown){
+			pass_shown = false;
+			document.getElementById("pass_toggler").setAttribute("class","lock_closed");
+			document.getElementById("masterkey").setAttribute("type","password");
+		} else {
+			pass_shown = true;
+			document.getElementById("pass_toggler").setAttribute("class","lock_opened");		
+			document.getElementById("masterkey").removeAttribute("type");
+		}
+	}
+	
+	
 	
 	window.addEventListener("load", ParanoiaPasswordManager.XUL.init, false);
 	window.addEventListener("unload", ParanoiaPasswordManager.XUL.uninit, false);

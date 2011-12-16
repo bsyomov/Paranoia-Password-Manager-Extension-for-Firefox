@@ -19,12 +19,9 @@ function ParanoiaServer(serverConfig) {
 	var xhr = null;
 	var self = this;
 	var fullPayloadData = {};
-	fullPayloadData.payloads  = new Array();
-	var disconnection_ts = Date.now() - PPM.pConfig.getConfig("auto_reconnect_disconnected_servers_after_ms",60000);//so that newly created servers connect right away
+	var disconnection_ts = Date.now() - PPM.pConfig.getConfig("auto_reconnect_disconnected_servers_after_ms");//so that newly created servers connect right away
 	var initial_payload_loaded = false;
-	var payloads_to_load = new Array();
 	var TO_TIMER = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);//connection timeout timer
-	var internal_timer_ms = PPM.pConfig.getConfig("server_queue_check_interval_ms", 500);
 	//
 	
 	this.connect = function() {//PHASE 1 - get initial login seed
@@ -51,78 +48,46 @@ function ParanoiaServer(serverConfig) {
 		is_connected = true;//OK - WE ARE CONNECTED TO SERVER
 		_ping_service_start();
 		log("CONNECTED");
-		PPM.pServer.serverConnected();
 		if (initial_payload_loaded === false) {
-			this.load_payload_index();
+			this.load_full_payload();
 		}
 	}
 	
-	this.load_payload_index = function() {
-		log("loading payload index(PHASE3)...");
-		_comunicateWithServer({	service: "get", callback: "load_payload_index_DONE", params: {"payload_index":true} });
+	this.load_full_payload = function() {
+		log("loading payload(PHASE3)...");
+		_comunicateWithServer({service: "get", callback: "load_full_payload_DONE"});
 	}
 	
-	this.load_payload_index_DONE = function() {
+	this.load_full_payload_DONE = function() {
 		if(this.SCO.hasNewSeed !== true) {
-			log("loading payload index(PHASE3) error - LOAD PAYLOAD INDEX FAILED!");
+			log("loading payload(PHASE3) error - LOAD FULL PAYLOAD FAILED!");
 			return;
 		}
 		try {
 			var fpdata;		
-			fpdata = JSON.parse(self.SCO.serverResponse);			
-			if (typeof(fpdata) == "object" && typeof(fpdata.payloads) == "object" && (fpdata.payloads instanceof Array)) {				
-				for (var i=0; i<fpdata.payloads.length; i++) {payloads_to_load[i] = fpdata.payloads[i].id;}
-				log("number of payloads in index: " + payloads_to_load.length);
+			fpdata = JSON.parse(self.SCO.serverResponse);
+			//log("FULL PAYLOAD DATA: " + JSON.stringify(fpdata));
+			
+			if (typeof(fpdata) == "object" && typeof(fpdata.payloads) == "object" && (fpdata.payloads instanceof Array)) {
+				//log("PAYLOADS BEFORE DECRYPT: " + JSON.stringify(fpdata.payloads));
+				for (var i=0; i<fpdata.payloads.length; i++) {
+					fpdata.payloads[i].payload = PPM.pUtils.decryptWithScheme(fpdata.payloads[i].payload, config["master_key"], config["encryption_scheme"]);
+				}
+				//log("PAYLOADS AFTER DECRYPT: " + JSON.stringify(fpdata.payloads));
+				fullPayloadData = fpdata;
 			}
-			log("loading payload index(PHASE3) - OK");
-			if (payloads_to_load.length==0) {
-				log("Payload index is empty - finished server initialization");
-				initial_payload_loaded = true;
-				PPM.pServer.server_has_loaded_payload();
-			}
-			//OK - we have stuff to load - from here on the "check_what_to_do" method will check for payloads_to_load array and call "_load_next_payload_in_queue"
+			initial_payload_loaded = true;
+			log("loading payload(PHASE3) - OK");
+			PPM.pServer.server_has_loaded_payload();
 		} catch (e) {
 			log("PARSE FULL PAYLOAD FAILED!");
 			return;
-		}				
-	}
-	
-	var _load_next_payload_in_queue = function() {
-		if (payloads_to_load.length>0) {
-			var payloadID = payloads_to_load.pop();
-			log("loading payload by id("+payloadID+")...");
-			_comunicateWithServer({	service: "get", callback: "load_next_payload_in_queue_DONE", params: {"payload_id":payloadID} });
-		} else {
-			log("load next payload in queue was called but queue is empty!");
 		}		
+		
+
+		
+				
 	}
-	
-	this.load_next_payload_in_queue_DONE = function() {
-		if(this.SCO.hasNewSeed !== true) {
-			log("LOAD PAYLOAD FAILED!");
-			return;
-		}
-		try {
-			var fpdata;		
-			fpdata = JSON.parse(self.SCO.serverResponse);			
-			if (typeof(fpdata) == "object" && typeof(fpdata.payloads) == "object" && (fpdata.payloads instanceof Array)) {
-				//log("PAYLOADS BEFORE DECRYPT: " + JSON.stringify(fpdata.payloads));
-				fpdata.payloads[0].payload = PPM.pUtils.decryptWithScheme(fpdata.payloads[0].payload, config["master_key"], config["encryption_scheme"]);
-				//log("PAYLOAD AFTER DECRYPT: " + JSON.stringify(payload));
-				//var i = fullPayloadData.payloads.length;
-				//fullPayloadData.payloads[i] = fpdata.payloads[0];
-				fullPayloadData.payloads.push(fpdata.payloads[0]);
-			}
-			if (payloads_to_load.length == 0) {
-				log("All payloads were loaded: " + fullPayloadData.payloads.length);
-				initial_payload_loaded = true;
-				PPM.pServer.server_has_loaded_payload();	
-			}
-		} catch (e) {
-			log("PAYLOAD PARSE FAILED!" + e);
-			return;
-		}		
-	}	
 	
 	
 	this.disconnect = function() {
@@ -153,7 +118,9 @@ function ParanoiaServer(serverConfig) {
 		PPM.pServer.serverDisconnected();
 	}
 	
-		
+	
+	
+	
 	this.get_payloads = function() {
 		return(fullPayloadData.payloads);
 	}
@@ -335,7 +302,7 @@ function ParanoiaServer(serverConfig) {
 			try {
 				last_ping_ts = Date.now();
 				ping_interval_ref = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-				ping_interval_ref.init(self, internal_timer_ms, Ci.nsITimer.TYPE_REPEATING_SLACK);
+				ping_interval_ref.init(self, 250, Ci.nsITimer.TYPE_REPEATING_SLACK);
 			} catch (e) {
 				ping_interval_ref = null;
 				log("ping service registration error: "+e);
@@ -363,7 +330,7 @@ function ParanoiaServer(serverConfig) {
 			var connect_in_ms = disconnection_ts + PPM.pConfig.getConfig("auto_reconnect_disconnected_servers_after_ms") - Date.now();
 			//log("SERVER WAS DISCONNECTED @ " + disconnection_ts + " reconnecting in: " + connect_in_ms);
 			if (connect_in_ms < 0) {				
-				disconnection_ts = Date.now();//we must renew this
+				disconnection_ts = Date.now();//we must renew this otherwise we will do it ever 250ms
 				log("trying to reconnect(@"+disconnection_ts+")...");
 				self.connect();
 			}
@@ -372,18 +339,12 @@ function ParanoiaServer(serverConfig) {
 		
 		if (is_busy){return;}
 		
-		//1 - check if we have payloads to load in array "payloads_to_load"
-		if (payloads_to_load.length > 0) {
-			_load_next_payload_in_queue();
-			return;
-		}
-		
-		//2 - EXECUTING OPERATION IN QUEUE - IF ANY
+		//1- EXECUTING OPERATION IN QUEUE - IF ANY
 		if (operation_queue.length > 0) {
 			_execute_next_task_in_operation_queue();
 			return;
 		}
-		//3 - PINGING SERVER - IF NECESSARY
+		//2- PINGING SERVER - IF NECESSARY
 		if ( (last_ping_ts + config["ping_interval_ms"]) < Date.now()) {
 			last_ping_ts = Date.now();			
 			_comunicateWithServer({service: "ping"});			
@@ -411,7 +372,7 @@ function ParanoiaServer(serverConfig) {
 	}
 
 	
-	var _comunicateWithServer = function(SCO) {//SCO(ServerComunicationObject) {service:"name of service", callback:"callback function to call", payloads:...payloads, params:...params...}
+	var _comunicateWithServer = function(SCO) {//SCO(ServerComunicationObject) {service:"name of service", callback:"callback function to call", payloads:...payloads...}
 		try {
 			_setBusy();
 			TO_TIMER.init({
@@ -430,7 +391,6 @@ function ParanoiaServer(serverConfig) {
 			self.SCO = SCO;
 			SCO.data2send = _getPostDataDefaultObject(SCO.service);			
 			if (typeof(SCO.payloads) == "object" && (SCO.payloads instanceof Array)) {SCO.data2send.payloads = SCO.payloads;}
-			if (typeof(SCO.params) == "object" && (SCO.params instanceof Object)) {SCO.data2send.params = SCO.params;}
 			SCO.Edata2send = encryptD2S(SCO.data2send);			
 			xhr.open("POST", config["url"], true); //false === SYNC / true === ASYNC			
 			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -526,7 +486,6 @@ function ParanoiaServer(serverConfig) {
 		seed = null;
 		timestamp = null;
 		disconnection_ts = Date.now();//so we know when we disconnected and can do auto reconnection after n ms
-		PPM.pServer.serverDisconnected();
 	}
 	
 	this.killServer = function() {

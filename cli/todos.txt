@@ -1,6 +1,1 @@
-
-LOGIN PANEL - put password field on it
-
-// CONFIGURATION: new default values! - we need to find a way to insert into configuration the newly introduced default configuration values
-
-//SERVERCONCENTRATOR - if no servers are defined PPM will NOT DISCONNECT!!- BAD STUFF!
+//

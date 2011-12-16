@@ -3,10 +3,10 @@
 <?xml-stylesheet type="text/css" href="chrome://paranoia/skin/paranoia.css" ?>
 
   	
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="PARANOIA MASTER KEY CHANGE">
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="ENCRYPTION SCHEME AND ENCRYPTION KEY CHANGE">
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_change_mk.js" />
 	
-	<vbox align="center">
+	<vbox width="700">
 		<hbox height="90" width="700">
 			<label class="logo-64" value="" width="70" />
 			<vbox>
@@ -17,18 +17,26 @@
 	
 		<hbox width="700">
 			<vbox>
-				<label value="Encryption Scheme" />
-				<listbox id="ESS" width="150" rows="5" onselect="ParanoiaPasswordManager.XUL.w_es_select();" />
+				<label value="Encryption Scheme(ES)" />
+				<listbox id="ESS" width="200" rows="5" onselect="ParanoiaPasswordManager.XUL.w_es_select();" />
 			</vbox>
-			<textbox id="encdesc" value="" class="desc" width="200" rows="5" multiline="true" readonly="true"/>
-			<vbox>
-				<label value="Master Key" />
-				<textbox class="inputfield" width="300" rows="5" id="masterkey" value="" multiline="true"/>
-			</vbox>
+			<textbox id="encdesc" value="" class="desc" width="480" rows="5" multiline="true" readonly="true"/>			
 		</hbox>
-
+		
+		<vbox>
+			<label value="Master Key(MK)" />
+			<hbox>
+				<textbox class="ppm_input_pw" width="660" id="masterkey" value="" type="password"/>
+				<label id="pass_toggler" class="lock_closed" onclick="ParanoiaPasswordManager.XUL.show_hide_password();" value="" width="16" height="16" />
+			</hbox>
+		</vbox>
+		
 		<label id="sysmsg" value="" class="error" />
-		<button label="Change and re-encrypt my settings" icon="accept" oncommand="ParanoiaPasswordManager.XUL.w_change();"/>
-		<button label="Cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>
+		<separator />
+		<hbox align="right">
+			<button label="Change and re-encrypt" icon="accept" oncommand="ParanoiaPasswordManager.XUL.w_change();"/>
+			<button label="Cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>
+		</hbox>
+		
 	</vbox>
 </window>

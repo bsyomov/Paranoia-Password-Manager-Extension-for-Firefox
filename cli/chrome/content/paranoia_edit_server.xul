@@ -6,64 +6,70 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="EDIT SERVER CONFIGURATION" >
 <script type="application/x-javascript" src="chrome://paranoia/content/paranoia_edit_server.js"></script>
 	
-<vbox align="left">
-	<label id="title" class="title" value="Modify your server configuration"/>
-	<description flex="1"></description>	
-	
-	<hbox>
-		<label class="inputname" value="Server number" />
-		<textbox class="inputfield" size="50" maxlength="64" id="number" label="" disabled="true" />
-	</hbox>
-	
-	<hbox>
-		<label class="inputname" value="Server type" />
-		<textbox class="inputfield" size="50" maxlength="64" id="type" label="" disabled="true" />
-	</hbox>
-	
-	<hbox>
-		<label class="inputname" value="Server name" />
-		<textbox class="inputfield" size="50" maxlength="64" id="name" label="" />
-	</hbox>
-	
-	<hbox>
-		<label class="inputname" value="Server url" />
-		<textbox class="inputfield" size="50" maxlength="64" id="url" label="" />
-	</hbox>
-	
-	<hbox>
-		<label class="inputname" value="Server username" />
-		<textbox class="inputfield" size="50" maxlength="64" id="username" label="" />
-	</hbox>
-	
-	<hbox>
-		<label class="inputname" value="Server password" />
-		<textbox class="inputfield" size="50" maxlength="64" id="password" label="" type="password" />
-	</hbox>
-	
-	
-	<hbox>
-		<label class="inputname" value="Ping interval(ms)" />
-		<textbox class="inputfield" size="50" maxlength="64" id="ping_interval_ms" label="" />
-	</hbox>
-	
+	<vbox align="left">
+		<label id="title" class="title" value="Modify your server configuration"/>
+		<description flex="1"></description>	
+		
+		<hbox>
+			<label class="inputname" value="Server number" />
+			<textbox class="inputfield" size="50" maxlength="64" id="number" label="" disabled="true" />
+		</hbox>
+		
+		<hbox>
+			<label class="inputname" value="Server type" />
+			<textbox class="inputfield" size="50" maxlength="64" id="type" label="" disabled="true" />
+		</hbox>
+		
+		<hbox>
+			<label class="inputname" value="Server name" />
+			<textbox class="inputfield" size="50" maxlength="64" id="name" label="" />
+		</hbox>
+		
+		<hbox>
+			<label class="inputname" value="Server url" />
+			<textbox class="inputfield" size="50" maxlength="64" id="url" label="" />
+		</hbox>
+		
+		<hbox>
+			<label class="inputname" value="Server username" />
+			<textbox class="inputfield" size="50" maxlength="64" id="username" label="" />
+		</hbox>
+		
+		<hbox>
+			<label class="inputname" value="Server password" />
+			<textbox class="inputfield" size="50" maxlength="64" id="password" label="" type="password" />
+		</hbox>
+		
+		
+		<hbox>
+			<label class="inputname" value="Ping interval(ms)" />
+			<textbox class="inputfield" size="50" maxlength="64" id="ping_interval_ms" label="" />
+		</hbox>
+		
+		<separator />
+		
+		<hbox width="700">
+			<vbox>
+				<label value="Encryption Scheme(ES)" />
+				<listbox id="ESS" width="200" rows="5" onclick="ParanoiaPasswordManager.XUL.w_es_select();" />
+			</vbox>
+			<textbox id="encdesc" value="" class="desc" width="480" rows="5" multiline="true" readonly="true"/>
+		</hbox>
+		
+		<vbox>
+			<label value="Master Key(MK)" />
+			<hbox>
+				<textbox class="ppm_input_pw" width="660" id="masterkey" value="" type="password"/>
+				<label id="pass_toggler" class="lock_closed" onclick="ParanoiaPasswordManager.XUL.show_hide_password();" value="" width="16" height="16" />
+			</hbox>
+		</vbox>
+		<label id="sysmsg" value="" class="error" />
+		
+	</vbox>
 	<separator />
-	
-	<hbox width="700">
-			<vbox>
-				<label value="Encryption Scheme" />
-				<listbox id="ESS" width="150" rows="5" onclick="ParanoiaPasswordManager.XUL.w_es_select();" />
-			</vbox>
-			<textbox id="encdesc" value="" class="desc" width="200" rows="5" multiline="true" readonly="true"/>
-			<vbox>
-				<label value="Master Key" />
-				<textbox class="inputfield" width="300" rows="5" id="masterkey" value="" multiline="true"/>
-			</vbox>
-	</hbox>
-	
-</vbox>
-<separator />
-<hbox align="right">
+	<hbox align="right">
 		<button label="set" icon="apply" oncommand="ParanoiaPasswordManager.XUL.w_save();"/>
 		<button label="cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.w_close();"/>
 	</hbox>
+	
 </window>

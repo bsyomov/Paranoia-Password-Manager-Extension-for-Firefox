@@ -73,13 +73,29 @@ function ParanoiaConfiguration() {
 		}	
 	}
 	
-	this.getConfig = function(cName) {
+	/*
+ 	this.killAllPrefs = function() {
+		prefs.deleteBranch("");
+	}	
+	*/
+	this.removeEntireBranch = function() {
+		prefs.clearUserPref("settings");
+		ps.savePrefFile(null);//force saving file prefs.js
+	}
+	this.substituteEntireBranch = function(cryptedSettings){
+		prefs.setCharPref("settings", cryptedSettings);
+		ps.savePrefFile(null);//force saving file prefs.js
+	}
+	
+	this.getConfig = function(cName, defaultValue) {
+		var answer = (typeof(defaultValue)!="undefined"?defaultValue:false);
 		if (typeof(settings[cName]) != "undefined") {
-			return(settings[cName]);
+			answer = settings[cName];
+			if (answer=="true" || answer=="false") {answer=(answer=="true"?true:false);}
 		} else {
 			log("The requested setting["+cName+"] does not exist!");
-			return (false);
 		}
+		return (answer);
 	}
 	
 	this.setConfig = function(cName,cValue) {
@@ -107,6 +123,9 @@ function ParanoiaConfiguration() {
 		}
 	}
 	
+	this.getCryptedSettings = function() {
+		return(prefs.getCharPref("settings"));
+	}
 	
 	this.getSettingsInArray = function() {
 		var answer = [];
@@ -141,12 +160,6 @@ function ParanoiaConfiguration() {
 		Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "paranoia-logged-out", "");
 		return (true);
 	}
-
-	/*
- 	this.killAllPrefs = function() {
-		prefs.deleteBranch("");
-	}	
-	*/
 	
 	
 	/*----------------------------------------------------------------------------------------------------------------------PRIVATE METHODS*/
@@ -170,10 +183,14 @@ function ParanoiaConfiguration() {
 				log("NO PARANOIA SETTINGS - CREATING DEFAULTS");
 				var settings = {
 					"logincount": 0,
+					"log_to_console": "false",
 					"colorize_matched_fields": 1,
-					"show_trippleunderscore_configs": 0,
+					"show_trippleunderscore_configs": "false",
 					"auto_reconnect_disconnected_servers_after_ms": 60000,
 					"timeout_server_connection_after_ms": 5000,
+					"server_queue_check_interval_ms": 500,
+					"pwgen_length": 32,
+					"pwgen_specialchars": '+-_|!$%&([{}])?^*@#.,:;~',
 					"___multiple_server_master_key" : "Paranoia",
 					"___multiple_server_encryption_scheme" : "AesMd5"
 				};

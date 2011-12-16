@@ -99,7 +99,13 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 	
 	this.XUL.generate_password = function() {
 		var pw = PPM.pUtils.generatePassword();
-		//PPM.XUL.log("PW: " + pw);
+		if (document.getElementById("password").value != "") {
+			var cTitle = "Generate new password?";
+			var cQuestion = "You already have a password set. Are you sure you want to generate a new one?";
+			if (!PPM.pUtils.confirm(cQuestion,cTitle)) {
+				return;
+			}
+		}
 		document.getElementById("password").value = pw;
 		PPM.XUL.passwordFieldChange();
 		if (!pass_shown) {

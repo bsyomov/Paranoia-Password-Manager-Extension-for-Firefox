@@ -5,7 +5,8 @@
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings.js"></script>
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_passurl.js"></script>
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_config.js"></script>
-	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_server.js"></script>	
+	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_settings_server.js"></script>
+	
 	
 	
 	<hbox height="90">
@@ -16,14 +17,14 @@
 		</vbox>
 	</hbox>
 	
-	<vbox height="150" id="noLoginWarningPanel" class="nodisplay">
+	<vbox height="150" id="noLoginWarning" style="display:none;">
 		<label style="display:block; margin-left:110px;" class="errorBig" value="You must first decrypt your configuration!" />
 		<label style="display:block; margin-left:110px; color: #65861A; cursor: pointer;" value="Open login panel" onclick="ParanoiaPasswordManager.pSettings.openLoginPanel();"/>
 		<separator />
 		<label style="display:block; margin-left:110px; color: #65861A; cursor: help;" value="I'm stuck! I want to go to the support site!" onclick="ParanoiaPasswordManager.pSettings.openSupportSite();"/>
 	</vbox>
 		
-	<vbox id ="ppmSettingsPanel" flex="1" class="nodisplay">
+	<vbox style="border:1px solid #ff0000;" flex="1">
 		<tabbox id="settings-tabbox" flex="1">
 				<tabs>
 					<tab label="PASSWORD/URL MANAGEMENT" />
@@ -33,33 +34,34 @@
 				
 				<tabpanels id="settingsTabPanels" flex="1">					
 					
-					<tabpanel flex="1">						
-							<vbox flex="1">								
-								<hbox>
-									<hbox align="left" flex="1">
-										<label control="passUrlFilter" value="search:" style="padding-top:5px;"/>
-										<textbox id="passUrlFilter" oninput="ParanoiaPasswordManager.pSettings.PASSURL.setFilter(event)" style="width:200px;" align="left"/>
-									</hbox>
-									<hbox align="right" flex="1">
-										<button oncommand="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick_new('passcard',0);" label="NEW PASSCARD" icon="add"/>
-									</hbox>
+					<tabpanel flex="1">							
+						<vbox flex="1">
+							
+							<hbox>
+								<hbox align="left" flex="1">
+									<label control="passUrlFilter" value="search:" style="padding-top:5px;"/>
+									<textbox id="passUrlFilter" oninput="ParanoiaPasswordManager.pSettings.PASSURL.setFilter(event)" style="width:200px;" align="left"/>
 								</hbox>
-								
-								<tree id="dataTree" flex="100" seltype="single" class="tree" treelines="true" hidecolumnpicker="true" onclick="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick(this,event)">								
-									<treecols>
-										<treecol id="name" label="name" flex="5" primary="true"/>
-										<splitter class="tree-splitter"/>
-										<treecol id="url" label="url" flex="10" />
-										<treecol id="openurl" width="20" fixed="true" tooltiptext="open url" class="treecol-image" src="chrome://paranoia/skin/images/externalurl.png"/>
-										<treecol id="new" width="20" fixed="true" tooltiptext="add urlcard" class="treecol-image" src="chrome://paranoia/skin/images/addurl.png"/>
-										<treecol id="edit" width="20" fixed="true" tooltiptext="edit urlcard/passcard" class="treecol-image" src="chrome://paranoia/skin/images/edit.png"/>
-										<treecol id="delete" width="20" fixed="true" tooltiptext="delete urlcard/passcard" class="treecol-image" src="chrome://paranoia/skin/images/trash.png"/>
-										<treecol id="sync" width="20" fixed="true" tooltiptext="sync state"/>
-										<treecol id="pad" width="20" fixed="true"/>
-									</treecols>
-									<treechildren/>
-								</tree>
-							</vbox>
+								<hbox align="right" flex="1">
+									<button oncommand="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick_new('passcard',0);" label="NEW PASSCARD" icon="add"/>
+								</hbox>
+							</hbox>
+							
+							<tree id="dataTree" flex="1" seltype="single" class="tree" treelines="true" hidecolumnpicker="true" onclick="ParanoiaPasswordManager.pSettings.PASSURL.dataTreeClick(this,event)">								
+								<treecols>
+									<treecol id="name" label="name" flex="5" primary="true"/>
+									<splitter class="tree-splitter"/>
+									<treecol id="url" label="url" flex="10" />
+									<treecol id="openurl" width="20" fixed="true" tooltiptext="open url" class="treecol-image" src="chrome://paranoia/skin/images/externalurl.png"/>
+									<treecol id="new" width="20" fixed="true" tooltiptext="add urlcard" class="treecol-image" src="chrome://paranoia/skin/images/addurl.png"/>
+									<treecol id="edit" width="20" fixed="true" tooltiptext="edit urlcard/passcard" class="treecol-image" src="chrome://paranoia/skin/images/edit.png"/>
+									<treecol id="delete" width="20" fixed="true" tooltiptext="delete urlcard/passcard" class="treecol-image" src="chrome://paranoia/skin/images/trash.png"/>
+									<treecol id="sync" width="20" fixed="true" tooltiptext="sync state"/>
+									<treecol id="pad" width="20" fixed="true"/>
+								</treecols>
+								<treechildren/>
+							</tree>
+						</vbox>
 					</tabpanel>
 					
 					
@@ -95,14 +97,14 @@
 					
 					<tabpanel flex="1">
 						<vbox flex="1">
-							<vbox>
+							<vbox flex="1">
 								<hbox align="right">
 									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_changeMultipleServerESMK();" label="CHANGE FIRST PASS ES/MK" icon=""/>
 									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_resync_all_servers();" label="RESYNC SERVERS" icon="refresh"/>
 									<button oncommand="ParanoiaPasswordManager.pSettings.SERVER.PSERV_click_addParanoiaServer();" label="ADD SERVER" icon="add"/>								
 								</hbox>
 							</vbox>							
-							<vbox id="PARANOIA_SRV_ENTRIES" style="overflow:auto;" flex="1" />
+							<vbox id="PARANOIA_SRV_ENTRIES" style="overflow:auto;" />
 						</vbox>
 					</tabpanel>
 					

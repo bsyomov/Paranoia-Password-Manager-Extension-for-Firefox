@@ -82,7 +82,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			//
 			_data.is_new = is_new;
 			_data.elementID = UC.get("id");
-			PPM.pSettings.PASSURL.dataTreeClick_edit_save(_data);
+			//PPM.pSettings.PASSURL.dataTreeClick_edit_save(_data);
+			PPM.XUL.doCallback();
 			close();
 		}	
 		
@@ -228,6 +229,25 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			}	
 		}
 		
+		this.doCallback = function() {
+			try {
+				var _CALLBACKFUNCTIONSTRING = _data.CALLBACKFUNCTION;
+				var fa = _CALLBACKFUNCTIONSTRING.split(".");
+				var f = PPM;
+				for (var i=0;i<fa.length;i++) {
+					var fn = fa[i];
+					f = f[fn];
+				}
+				if (typeof(f) == "function") {
+					f.call(null, _data);
+				} else {
+					throw("CALLBACK ERROR: PPM." + _CALLBACKFUNCTIONSTRING + " IS NOT A CALLABLE FUNCTION!");
+				}
+			} catch(e) {
+				PPM.log("CALLBACK ERROR: " + e);
+				//alert("FATAL ERROR! - the requested procedure could not be found!");
+			}
+		}
 		
 		var log = function(msg) {
 			PPM.log(msg, "UCEDIT");

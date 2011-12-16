@@ -6,28 +6,29 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="PARANOIA PASSWORD MANAGER LOGIN PANEL">
 	<script type="application/x-javascript" src="chrome://paranoia/content/paranoia_login.js" />	
 
-		<vbox align="center">
+		<vbox align="center" id="loginpanel" width="450">
 			
 			<hbox height="90" width="450">
 				<label class="logo-64" value="" width="70" />
-				<vbox>
-					<label class="title" value="Paranoia Password Manager Login" />
-					<label value="Select your encryption scheme and insert your Master Key." />
+				<vbox width="360">
+					<label class="title" value="Paranoia Password Manager" />
+					<label value="Select your ES and MK to decrypt your configuration." />
+					<label value="Import/Reset configuration" style="font-size:9px; color:#800000; cursor:pointer;" onclick="ParanoiaPasswordManager.XUL.import_reset_config();"/>
 				</vbox>
 			</hbox>
 			
 			<vbox width="450">
 				<vbox>
-					<label value="Encryption Scheme"/>
+					<label value="Encryption Scheme(ES)"/>
 					<menulist id="ESS" name="ESS" oncommand="ParanoiaPasswordManager.XUL.es_select();">
 						<menupopup />
 					</menulist>
 				</vbox>
 				<separator />
 				<vbox>
-					<label value="Master Key"/>
+					<label value="Master Key(MK)"/>
 					<hbox>
-						<textbox width="430" id="masterkey" value="" type="password" tabindex="1"/>
+						<textbox class="ppm_input_pw" width="430" id="masterkey" value="Paranoia" type="password" tabindex="1"/>
 						<label id="pass_toggler" class="lock_closed" onclick="ParanoiaPasswordManager.XUL.show_hide_password();" value="" width="16" height="16" />
 					</hbox>
 				</vbox>
@@ -35,8 +36,25 @@
 			<separator />
 			<label id="sysmsg" value="" class="error" />
 			<separator />
-			<button label="Login" icon="accept" oncommand="ParanoiaPasswordManager.XUL.login();" tabindex="2" />
-			
+			<hbox>
+				<button id="loginCancel" label="Cancel" icon="cancel" oncommand="close();" tabindex="3" />
+				<button id="loginSubmit" label="Login" icon="accept" oncommand="ParanoiaPasswordManager.XUL.login();" tabindex="2" />
+			</hbox>
+		</vbox>
+		
+		<vbox align="center" id="impresPanel" class="nodisplay">
+			<vbox width="500">
+				<label class="title" value="Import or reset your current configuration" />
+				<textbox value="ATTENTION! If you go ahead with this process all your current configuration will be wiped out! Import: You must have a crypted configuration file exported from Paranoia and you must know the ES+MK for it. Reset: It will wipe out all configuration and reset it to default values." class="desc" width="250" rows="3" multiline="true" readonly="true"/>
+				<label class="desc" value="Paste your configuration here (the entire file content)" />
+				<textbox id="cfgCnt" value="" class="desc" width="250" rows="6" multiline="true" />
+				<separator />
+				<hbox align="center">
+					<button id="ir_cancel" label="Cancel" icon="cancel" oncommand="ParanoiaPasswordManager.XUL.IR_cancel();" tabindex="1" />
+					<button id="ir_reset" label="Reset" icon="refresh" oncommand="ParanoiaPasswordManager.XUL.IR_reset();" tabindex="2" />
+					<button id="ir_import" label="Import" icon="apply" oncommand="ParanoiaPasswordManager.XUL.IR_import();" tabindex="3" />
+				</hbox>
+			</vbox>
 		</vbox>
 
 </window>

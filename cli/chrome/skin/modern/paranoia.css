@@ -1,6 +1,23 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
-#ParanoiaToolbarButton {list-style-image: url(chrome://paranoia/skin/images/logo/paranoia_32_off.png);}
+/*OVERLAY ICONS BIG*/
+#ParanoiaToolbarButton {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_on.png);}
+#ParanoiaToolbarButton[state="off"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_off.png);}
+#ParanoiaToolbarButton[state="yellow"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_yellow.png);}
+#ParanoiaToolbarButton[state="on"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_on.png);}
+#ParanoiaToolbarButton[state="on"][badge="servererror"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_on_servererror.png);}
+#ParanoiaToolbarButton[state="on"][badge="passcard"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_on_passcard.png);}
+#ParanoiaToolbarButton[state="on"][badge="intercept"] {list-style-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_on_intercept.png);}
+
+
+/*OVERLAY ICONS SMALL*/
+toolbar[iconsize="small"] #ParanoiaToolbarButton {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_on.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="off"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_off.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="yellow"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_yellow.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="on"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_on.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="on"][badge="servererror"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_on_servererror.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="on"][badge="passcard"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_on_passcard.png);}
+toolbar[iconsize="small"] #ParanoiaToolbarButton[state="on"][badge="intercept"] {list-style-image: url(chrome://paranoia/skin/images/logo/16x16/paranoia_on_intercept.png);}
 
 
 /*MAIN MENU ITEMO ICONS*/
@@ -14,6 +31,10 @@
 }
 #pmm_info {
 	list-style-image: url(chrome://paranoia/skin/images/info.png);
+	padding-left:5px;
+}
+#pmm_newpc {
+	list-style-image: url(chrome://paranoia/skin/images/addpasscard.png);
 	padding-left:5px;
 }
 #pmm_pwgen {
@@ -32,15 +53,26 @@
 	list-style-image: url(chrome://paranoia/skin/images/addpasscard.png);
 	padding-left:5px;
 }
-
-
+.pmm_fillin {
+	list-style-image: url(chrome://paranoia/skin/images/fillin.png);
+	padding-left:5px;
+}
+.pmm_edit {
+	list-style-image: url(chrome://paranoia/skin/images/edit.png);
+	padding-left:5px;
+}
+.pmm_copy {
+	list-style-image: url(chrome://paranoia/skin/images/copy.png);
+	padding-left:5px;
+}
 
 
 
 
 .title {font-size:150%; color:#333333;padding-top:15px;}
-.error {color:#ff0000; font-size:75%;}
+
 .desc {color:#333333; font-size:75%;}
+
 label.inputname {color: #333333; width:130px;}
 textbox.inputfield{color:#111111;margin:0}
 
@@ -64,25 +96,42 @@ label.icon_pwgen {
 
 /*CONFIG TREE STYLING*/
 treechildren::-moz-tree-cell-text { font-size:8pt;margin-left:5px;}
-
 treechildren::-moz-tree-row { background-color: #EEEEEE; }
 treechildren::-moz-tree-row(odd) { background-color: #DDDDDD; }
-
 treechildren::-moz-tree-row(selected) { background-color: #ABDA41; }
 treechildren::-moz-tree-row(odd, selected) { background-color: #ABDA41; }
-
 treechildren::-moz-tree-cell-text(selected) { color: #000000; }
 treechildren::-moz-tree-cell-text(odd, selected) { color: #000000; }
+treechildren::-moz-tree-cell-text(selected) { color: #000000; }
+treechildren::-moz-tree-image(clickable) {cursor:pointer;}
 
 
 
 
+
+/*GENERAL PPM STYLES*/
+.clickable{cursor:pointer;}
+button{cursor:pointer;}
+tab{cursor:pointer;}
+textbox.ppm_input_pw{color:#65861A; font-size:9px; height:25px;}
+.error {color:#b00000; font-size:85%;}
+.errorBig {color:#b00000; font-size:125%;}
+.nodisplay{display:none;}
 
 
 
 /*LOGO CLASSES*/
-.logo-256{background-image: url(chrome://paranoia/skin/images/logo/paranoia_256.png); background-position: center; background-repeat: no-repeat;}
-.logo-128{background-image: url(chrome://paranoia/skin/images/logo/paranoia_128.png); background-position: center; background-repeat: no-repeat;}
 .logo-64{background-image: url(chrome://paranoia/skin/images/logo/paranoia_64.png); background-position: center; background-repeat: no-repeat;}
 .logo-32{background-image: url(chrome://paranoia/skin/images/logo/paranoia_32.png); background-position: center; background-repeat: no-repeat;}
-.logo-16{background-image: url(chrome://paranoia/skin/images/logo/paranoia_16.png); background-position: center; background-repeat: no-repeat;}
+.logo-24{background-image: url(chrome://paranoia/skin/images/logo/24x24/paranoia_24.png); background-position: center; background-repeat: no-repeat;}
+.logo-16{background-image: url(chrome://paranoia/skin/images/logox/16x16/paranoia_16.png); background-position: center; background-repeat: no-repeat;}
+
+
+
+
+/*TESTS*/
+/*
+tabbox#settings-tabbox{border:1px dashed #000000;}
+tabbox#settings-tabbox tabpanel{border:1px dashed #0000ff; width:100%;}
+*/
+

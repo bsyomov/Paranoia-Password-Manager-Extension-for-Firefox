@@ -6,6 +6,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 	this.XUL = {};
 	var _data = null;
 	var ESList;
+	var pass_shown = false;
 	
 	this.XUL.init = function() {
 		if("arguments" in window && window.arguments.length > 0) {//DATA IS PASSED AS JSON DATA
@@ -113,7 +114,8 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		}
 		var ESPWCHK = PPM.pUtils.schemePasswordCheck(MK,ES);
 		if (ESPWCHK !== true) {
-			alert("PASSWORD CHECK FOR SCHEME \""+ES+"\" FAILED!\n" + ESPWCHK);
+			//alert("PASSWORD CHECK FOR SCHEME \""+ES+"\" FAILED!\n" + ESPWCHK);
+			document.getElementById("sysmsg").value = ESPWCHK;
 			return false;
 		}
 		_data["encryption_scheme"] = ES;
@@ -142,6 +144,18 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			}
 		}
 		document.getElementById("encdesc").value = ESDESC;
+	}
+	
+	this.XUL.show_hide_password = function() {
+		if (pass_shown){
+			pass_shown = false;
+			document.getElementById("pass_toggler").setAttribute("class","lock_closed");
+			document.getElementById("masterkey").setAttribute("type","password");
+		} else {
+			pass_shown = true;
+			document.getElementById("pass_toggler").setAttribute("class","lock_opened");		
+			document.getElementById("masterkey").removeAttribute("type");
+		}
 	}
 	
 	window.addEventListener("load", ParanoiaPasswordManager.XUL.init, false);

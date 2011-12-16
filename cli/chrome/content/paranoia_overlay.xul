@@ -15,20 +15,21 @@
 	
 	
 	<toolbarpalette id="BrowserToolbarPalette">	
-		<toolbarbutton id="ParanoiaToolbarButton" oncommand="ParanoiaPasswordManager.pOverlay.mainButtonClick();" label="Paranoia" tooltiptext="Paranoia" class="toolbarbutton-1" >
+		<toolbarbutton id="ParanoiaToolbarButton" state="off" badge="" oncommand="ParanoiaPasswordManager.pOverlay.mainButtonClick();" label="Paranoia" tooltiptext="Paranoia Password Manager" class="toolbarbutton-1" >
 			<menupopup id="ParanoiaMainMenu">
-				<menuitem id="pmm_logout" label="Logout" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);" />
+				<menuitem id="pmm_logout" label="Logout" class="menuitem-iconic" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);" tooltiptext="close Paranoia session"/>
 				<menuseparator/>
-				<menuitem id="pmm_config" label="Configuration" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
+				<menuitem id="pmm_config" label="Configuration" class="menuitem-iconic" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
 				<menuseparator/>	
 				<menu id="ParanoiaUtilitiesMenu" label="Utilities" class="menu-iconic">
 					<menupopup id="ParanoiaUtilitiesSubmenu">
 						<menuseparator id="PMM_utils"/>
-						<menuitem id="pmm_pwgen" label="Generate password" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
-						<menuitem id="pmm_info" label="Info" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
+						<menuitem id="pmm_newpc" label="New Passcard" class="menuitem-iconic" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
+						<menuitem id="pmm_pwgen" label="Generate password" class="menuitem-iconic" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
+						<menuitem id="pmm_info" label="Info" class="menuitem-iconic" oncommand="ParanoiaPasswordManager.pOverlay.mainMenuItemCall(this,event);"/>
 					</menupopup>
 				</menu>
-				<menuseparator id="PMM_passhints"/>							
+				<menuseparator id="PMM_passhints"/>			
 			</menupopup>
 		</toolbarbutton>
 	</toolbarpalette>

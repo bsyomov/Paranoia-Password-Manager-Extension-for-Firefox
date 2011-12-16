@@ -10,18 +10,15 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		var PPM = ParanoiaPasswordManager;
 		var _logzone = "pSettings";
 		var _intervalExec = null;
+		var last_PPM_state = 0;//the timer on each state change will re-initialize the interfaces
 		
 		this.init = function() {		
 			log("initing...");
 			_register_listeners_and_observers();
+			try{PPM.pSettings.refreshMainInterface();} catch(e){log("MAIN SETTINGS INTERFACE REFRESH ERROR: " + e);}
 			try{PPM.pSettings.PASSURL.init();} catch(e){log("PASSURL INIT ERROR: " + e);}
 			try{PPM.pSettings.CONFIG.init();} catch(e){log("CONFIG INIT ERROR: " + e);}
-			try{PPM.pSettings.SERVER.init();} catch(e){log("SERVER INIT ERROR: " + e);}
-			
-			if (typeof(PPM.settings_tab_index) != "undefined") {
-				document.getElementById("settings-tabbox").selectedIndex = PPM.settings_tab_index;
-			}
-			
+			try{PPM.pSettings.SERVER.init();} catch(e){log("SERVER INIT ERROR: " + e);}			
 			log("inited.");
 		}		
 		
@@ -36,6 +33,31 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			log("uninited.");
 		};
 		
+		this.refreshMainInterface = function() {
+			if (document) {
+				if (PPM.get_state() < 3) {
+					document.getElementById("ppmSettingsPanel").setAttribute("class", "nodisplay");
+					document.getElementById("noLoginWarningPanel").removeAttribute("class");
+				} else {
+					document.getElementById("ppmSettingsPanel").removeAttribute("class");
+					document.getElementById("noLoginWarningPanel").setAttribute("class", "nodisplay");
+				}
+				//
+				if (typeof(PPM.settings_tab_index) != "undefined") {
+					document.getElementById("settings-tabbox").selectedIndex = PPM.settings_tab_index;
+				}
+			}
+		}
+		
+		this.openLoginPanel = function() {
+			close();
+			PPM.pOverlay.mainButtonClick();
+		}
+		this.openSupportSite = function() {
+			close();
+			PPM.pOverlay.mainMenuItemCall_pmm_info();
+		}
+		
 		
 		this.observe = function(source, topic, data) {
 			//log("observer: " + topic);
@@ -46,6 +68,13 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					PPM.pSettings.PASSURL.dataElementStateChange(data);
 					break;
 				case "timer-callback":
+					if (last_PPM_state != PPM.get_state()) {
+						last_PPM_state = PPM.get_state();
+						try{this.refreshMainInterface();} catch(e){log("MAIN SETTINGS INTERFACE REFRESH ERROR: " + e);}
+						PPM.pSettings.PASSURL.refreshTreeData();
+						PPM.pSettings.CONFIG.refreshTreeData();
+						PPM.pSettings.SERVER.refresh_server_entries();
+					}
 					PPM.pSettings.SERVER.PSERV_update_screen_data();//updating server's config pane
 					break;
 				default:

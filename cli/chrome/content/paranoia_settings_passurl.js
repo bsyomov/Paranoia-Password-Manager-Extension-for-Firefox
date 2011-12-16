@@ -26,31 +26,35 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		}
 		
 		this.refreshTreeData = function() {
-			this.dataTreeBox.rowCountChanged(0, -this.dataTreeView.rowCount);//remove all rows			
-			var CSD = PPM.pServer.getCombinedData();	
-			this.dataTreeView.mydata = new Array();
-			var RE = new RegExp(this.filter,'i');
-			for (var i=0; i<CSD.passcards.length; i++) {
-				var PASSCARD = CSD.passcards[i];
-				if ((this.filter.length > 0 && RE.test(PASSCARD.get("name"))) || this.filter.length == 0) {
-					//!!!THIS IS WAY TO SIMPLE - WE NEED DEDICATED FUNC FOR THIS AND CHECK
-					//PC.name, PC.username, PC.url
-					//AND ALSO ON CHILD URLCARDS (EVEN IF PASSCARD DOESN'T MATCH)
-					//UC.name, UC.url
-					//FOR NOW OK - ONLY TEST IMPLEMENTATION
-					this.dataTreeView.mydata.push(PASSCARD);
-					if (PASSCARD.get("is_open") == true && PASSCARD.get("number_of_children") > 0) {
-						var URLCARDS = PASSCARD.getChildren();
-						for (var ii = 0; ii < URLCARDS.length; ii++) {
-							var URLCARD = URLCARDS[ii];
-							this.dataTreeView.mydata.push(URLCARD);
+			try {
+				this.dataTreeBox.rowCountChanged(0, -this.dataTreeView.rowCount);//remove all rows			
+				var CSD = PPM.pServer.getCombinedData();
+				this.dataTreeView.mydata = new Array();
+				var RE = new RegExp(this.filter, 'i');
+				for (var i = 0; i < CSD.passcards.length; i++) {
+					var PASSCARD = CSD.passcards[i];
+					if ((this.filter.length > 0 && RE.test(PASSCARD.get("name"))) || this.filter.length == 0) {
+						//!!!THIS IS WAY TOO SIMPLE - WE NEED DEDICATED FUNC FOR THIS AND CHECK
+						//PC.name, PC.username, PC.url
+						//AND ALSO ON CHILD URLCARDS (EVEN IF PASSCARD DOESN'T MATCH)
+						//UC.name, UC.url
+						//FOR NOW OK - ONLY TEST IMPLEMENTATION
+						this.dataTreeView.mydata.push(PASSCARD);
+						if (PASSCARD.get("is_open") == true && PASSCARD.get("number_of_children") > 0) {
+							var URLCARDS = PASSCARD.getChildren();
+							for (var ii = 0; ii < URLCARDS.length; ii++) {
+								var URLCARD = URLCARDS[ii];
+								this.dataTreeView.mydata.push(URLCARD);
+							}
 						}
 					}
-				}
 				//PASSCARD.set("is_open",false);
 				//this.dataTreeView.mydata.push(PASSCARD);
+				}
+				this.dataTreeBox.rowCountChanged(0, this.dataTreeView.rowCount);//add all rows
+			} catch(e) {
+				//ooops
 			}
-			this.dataTreeBox.rowCountChanged(0, this.dataTreeView.rowCount);//add all rows
 		}
 		
 		this.setFilter = function(ev) {
@@ -99,6 +103,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			icon_folder_open : "chrome://paranoia/skin/images/folder_open.png",
 			icon_folder_closed : "chrome://paranoia/skin/images/folder_closed.png",
 			icon_url : "chrome://paranoia/skin/images/www.png",
+			icon_openurl : "chrome://paranoia/skin/images/externalurl.png",
 			icon_addurl : "chrome://paranoia/skin/images/addurl.png",
 			icon_wrench : "chrome://paranoia/skin/images/wrench.png",
 			icon_edit : "chrome://paranoia/skin/images/edit.png",
@@ -155,8 +160,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					return (answer);					  
 			},			
 			
-			
-			
+					
 			getParentIndex: function(idx) {
 				if (this.isContainer(idx)) return -1;
 				for (var t = idx - 1; t >= 0 ; t--) {
@@ -208,18 +212,24 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			  
 			getRowProperties: function(idx, prop) {},
 			
+			getColumnProperties: function(column, element, prop) {},
+			
 			getCellProperties: function(idx, column, prop) {					
 				  var datanode = this.mydata[idx];
 				  if (column.id == "name") {
+				  	/* - NOT USED ANYMORE
 					  if (this.isContainer(idx) == true) {
 						  prop.AppendElement(this.aserv.getAtom("prop_passcard"));
 					  } else {
 						  prop.AppendElement(this.aserv.getAtom("prop_url"));
 					  }
+					 */
+				  } else if (column.id == "openurl" || column.id == "new" || column.id == "edit" || column.id == "delete") {
+				  		prop.AppendElement(this.aserv.getAtom("clickable"));
 				  }
 			},	
 			
-			getColumnProperties: function(column, element, prop) {},
+			
 			
 	
 			getImageSrc: function(idx, column) {
@@ -237,6 +247,10 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 					  } else {
 						  icon = this.icon_url;
 					  }
+				  } else if (column.id == "openurl") {
+				  		if (datanode.get("url") != "") {
+							icon = this.icon_openurl;
+						}
 				  } else if (column.id == "edit") {
 						icon = this.icon_edit;
 				  } else if (column.id == "delete") {
@@ -285,10 +299,12 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 						this.dataTreeClick_new("urlcard",idx);
 					}				
 					break;
-				case "url":
+				case "openurl":
 					var myUrl = this.dataTreeView.mydata[idx].get("url");
-					var myAttr = this.dataTreeView.mydata[idx].get("name");
-					PPM.pUtils.openTab(myAttr,myUrl);					
+					if (myUrl != "") {
+						var myAttr = this.dataTreeView.mydata[idx].get("name");
+						PPM.pUtils.openTab(myAttr,myUrl);	
+					}			
 					break;	
 				default:
 					//log("NO ACTION DEFINED FOR Row/Col: "+idx+"/"+colname);
@@ -392,12 +408,11 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			return(answer);
 		}
 		
-		
-		this.exportPasscardsToFile = function() {
-			/*
-			 * THIS IS A TEMPORARY SOLUTION - THIS SHOULD ASK FOR ES+MK AND CRYPT-EXPORT THIS STUFF 
-			 * - 
-			*/
+		/*
+		this.exportPasscardsToFile = function() {//------DISABLED - button removed!!!
+			return;
+			 //<button oncommand="ParanoiaPasswordManager.pSettings.PASSURL.exportPasscardsToFile();" label="EXPORT" icon=""/>
+			 //THIS IS A TEMPORARY SOLUTION - THIS SHOULD ASK FOR ES+MK AND CRYPT-EXPORT THIS STUFF
 			if (!PPM.pUtils.confirm("Are you sure you want to export all your passcard and urlcard data in a NOT encrypted format?","IMPORTANT!")) {return;}
 			try {
 				var DA = new Array();
@@ -428,7 +443,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				log("EXPORT ERROR: " + e);
 			}
 		}	
-		
+		*/
 		
 		/*------------------------------------------------------------------------------------------------------------------PRIVATE METHODS*/
 		var log = function(msg) {PPM.log(msg,_logzone);}

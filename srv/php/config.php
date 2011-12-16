@@ -5,17 +5,17 @@ class paranoiaConfig {
 	true = any bad/unauthorized request will return "404 - Not Found" instead of real error
 	false = use it if you need to find out why things don't work
 	*/
-	var $stealth_mode_on = false;
+	var $stealth_mode_on = true;
 
 
 	//DATABASE - YOU MUST PUT YOUR CORRECT DATABASE SETTINGS HERE
-	var $mysql_server = "127.0.0.1";
-	var $mysql_database = "";
-	var $mysql_username = "";
-	var $mysql_password = "";
-	var $mysql_table_user = "paranoia_users";//do NOT change this unless you have changed the name of the table
-	var $mysql_table_seed = "paranoia_seeds";//do NOT change this unless you have changed the name of the table
-	var $mysql_table_data = "paranoia_data";//do NOT change this unless you have changed the name of the table
+	var $mysql_server = '127.0.0.1';
+	var $mysql_database = '';
+	var $mysql_username = '';
+	var $mysql_password = '';
+	var $mysql_table_user = 'paranoia_users';//do NOT change this unless you have changed the name of the table
+	var $mysql_table_seed = 'paranoia_seeds';//do NOT change this unless you have changed the name of the table
+	var $mysql_table_data = 'paranoia_data';//do NOT change this unless you have changed the name of the table
 
 
 	//SEED (THIS IS A STRING LIKE THAT WILL BE RENEWED AND SENT BACK TO PPM ON EACH COMUNICATION TO USE FOR CRYPTING FULL COMUNICATION DATA)

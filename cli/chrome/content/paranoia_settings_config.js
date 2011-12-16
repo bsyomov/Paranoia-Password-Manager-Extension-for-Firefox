@@ -27,18 +27,22 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		
 		
 		this.refreshTreeData = function() {
-			this.confTreeBox.rowCountChanged(0, -this.confTreeView.rowCount);//remove all rows
-			var settingsArray = PPM.pConfig.getSettingsInArray();
-			//log("data..." + JSON.stringify(settingsArray));
-			var treeData = [];
-			var RE = new RegExp(this.filter,'i');
-			for (var i=0; i<settingsArray.length; i++) {
-				if ( (this.filter.length > 0 && RE.test(settingsArray[i]["config_name"])) || this.filter.length == 0) {
-					treeData.push(settingsArray[i]);
-				}	
-			}			
-			this.confTreeView.mydata = treeData;
-			this.confTreeBox.rowCountChanged(0, this.confTreeView.rowCount);//add all rows
+			try {
+				this.confTreeBox.rowCountChanged(0, -this.confTreeView.rowCount);//remove all rows
+				var settingsArray = PPM.pConfig.getSettingsInArray();
+				//log("data..." + JSON.stringify(settingsArray));
+				var treeData = [];
+				var RE = new RegExp(this.filter, 'i');
+				for (var i = 0; i < settingsArray.length; i++) {
+					if ((this.filter.length > 0 && RE.test(settingsArray[i]["config_name"])) || this.filter.length == 0) {
+						treeData.push(settingsArray[i]);
+					}
+				}
+				this.confTreeView.mydata = treeData;
+				this.confTreeBox.rowCountChanged(0, this.confTreeView.rowCount);//add all rows
+			} catch(e) {
+				//ooops
+			}
 		}
 		
 		this.setFilter = function(ev) {
@@ -198,15 +202,15 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 		
 		this.changeMasterKey = function() {
 			var data = {};
-			data.title = "Change your login credentials";
-			data.description = "Change your encryption scheme and your Master Key for your Paranoia Login."
+			data.title = "Change your ES and MK for your configuration encryption";
+			data.description = "ES+MK to use to encrypt your configuration. Forget these and you will stay out."
 			data.ES = PPM.pConfig.get_ES();
 			data.MK = PPM.pConfig.get_MK();
 			data.CALLBACKFUNCTION = "pSettings.CONFIG.changeMasterKey_DONE";//do NOT put PPM on front
 			//
 			var xul_2_load_url = 'chrome://paranoia/content/paranoia_change_mk.xul';
 			var xul_2_load_width = 700;
-			var xul_2_load_height = 300;
+			var xul_2_load_height = 350;
 			var xul_2_load_params = 'modal, centerscreen';
 			window.openDialog(xul_2_load_url, "w_paranoia_change_mk", "width="+xul_2_load_width+", height="+xul_2_load_height+"," + xul_2_load_params,  JSON.stringify(data));
 		}
@@ -231,12 +235,12 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 			 * THIS IS A TEMPORARY SOLUTION - THIS SHOULD ASK FOR ES+MK AND CRYPT-EXPORT THIS STUFF 
 			 * -  the getSettingsInArray is no good - it is for other stuff - we need dedicated function
 			*/
-			if (!PPM.pUtils.confirm("Are you sure you want to export your configurations in a NOT encrypted format?","IMPORTANT!")) {return;}
+			if (!PPM.pUtils.confirm("Are you sure you want to export your configurations into a text file?","EXPORTING CRYPTED CONFIGURATION!")) {return;}
 			try {
-				var tus = PPM.pConfig.getConfig("show_trippleunderscore_configs");
-				if (tus != 1) {PPM.pConfig.setConfig("show_trippleunderscore_configs","1");}//it is needed to assure that we export all settings
-				var txt = JSON.stringify(PPM.pConfig.getSettingsInArray());
-				if (tus != 1) {PPM.pConfig.setConfig("show_trippleunderscore_configs","0");}//put it back to zero
+				//var tus = PPM.pConfig.getConfig("show_trippleunderscore_configs");
+				//if (tus != 1) {PPM.pConfig.setConfig("show_trippleunderscore_configs","1");}//it is needed to assure that we export all settings
+				var txt = JSON.stringify(PPM.pConfig.getCryptedSettings());
+				//if (tus != 1) {PPM.pConfig.setConfig("show_trippleunderscore_configs","0");}//put it back to zero
 				var dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 				var fileService = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
 				var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
@@ -249,7 +253,7 @@ Components.utils.import("resource://paranoiaModules/main.jsm");
 				foConverter.init(foStream, "UTF-8", 0, 0);
 				foConverter.writeString(txt);
 				foConverter.close();		
-				PPM.pUtils.alert("Unencrypted configuration file was written in: " + tmpfile,"CONFIGURATION EXPORT");	
+				PPM.pUtils.alert("Configuration file was written in: " + tmpfile,"CONFIGURATION EXPORT DONE");	
 			} catch (e) {
 				log("EXPORT ERROR: " + e);
 			}

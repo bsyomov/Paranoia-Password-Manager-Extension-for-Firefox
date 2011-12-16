@@ -132,6 +132,11 @@ function ParanoiaUtilities() {
 		var DOC = RW.document;
 		return(DOC);
 	}
+	this.getCurrentTabDocument = function(){
+		var RW = this.getCurrentWindow();
+		var DOC = RW.gBrowser.selectedBrowser.contentDocument;
+		return(DOC);
+	}
 	
 	this.alert = function(msg, title) {
 		if (typeof(title)=="undefined") {title="PARANOIA";}
@@ -164,18 +169,22 @@ function ParanoiaUtilities() {
 	}
 	
 	this.openTab = function(myAttr, myUrl) {
-		var myTab = this.getTabByAttribute(myAttr);
-		if (myTab !== false) {
-			var TB = myTab.CW.gBrowser;
-			TB.selectedTab = myTab.CT;
-			TB.ownerDocument.defaultView.focus();
-		} else {//no? - let's add one in current Window	
-			var browserEnumerator = this.getCurrentWindow();
-			var tabbrowser = browserEnumerator.gBrowser;
-			var newTab = tabbrowser.addTab(myUrl);
-			newTab.setAttribute(myAttr, myAttr);
-			tabbrowser.selectedTab = newTab;
-			tabbrowser.ownerDocument.defaultView.focus();		
+		try {
+			var myTab = this.getTabByAttribute(myAttr);
+			if (myTab !== false) {
+				var TB = myTab.CW.gBrowser;
+				TB.selectedTab = myTab.CT;
+				TB.ownerDocument.defaultView.focus();
+			} else {//no? - let's add one in current Window	
+				var browserEnumerator = this.getCurrentWindow();
+				var tabbrowser = browserEnumerator.gBrowser;
+				var newTab = tabbrowser.addTab(myUrl);
+				newTab.setAttribute(myAttr, myAttr);
+				tabbrowser.selectedTab = newTab;
+				tabbrowser.ownerDocument.defaultView.focus();
+			}
+		} catch(e) {
+			log("openTab error: " + e); 
 		}
 	}	
 	
@@ -186,6 +195,28 @@ function ParanoiaUtilities() {
 			TB.removeTab(myTab.CT);
 		}		
 	}
+	
+	
+	this.firstRunTasks = function() {/*!UNUSED! - was adwised to do this but I would leave it up to the user*/
+		try {
+			var toolbarId = "nav-bar";
+			var id = "ParanoiaToolbarButton";
+			var DOC = this.getCurrentWindowDocument();
+			if (!DOC.getElementById(id)) {
+				var toolbar = DOC.getElementById(toolbarId);
+				var before = toolbar.lastChild;
+				toolbar.insertItem(id, before);
+				toolbar.setAttribute("currentset", toolbar.currentSet);
+				DOC.persist(toolbar.id, "currentset");
+			}
+		} catch(e) {
+			this.alert("firstRunTasks ERROR: " + e);
+		}
+	
+	}
+	
+	
+	
 	
 	/*----------------------------------------------------------------------------------------------------------------------PRIVATE METHODS*/
 	var _encryptAES = function(txt,key) {
